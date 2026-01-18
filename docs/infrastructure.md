@@ -4,9 +4,18 @@
 
 This document outlines the infrastructure decisions, hosting architecture, and deployment strategy for KeyArc. It complements the main product document by focusing specifically on where and how the application will be deployed.
 
----
 
 ## Hosting Platform: Fly.io
+
+## Authentication & Zero-Knowledge Model
+
+KeyArc uses a Bitwarden-style authentication and encryption model, implemented with FastAPI. For full details on the cryptographic flow and security model, see the "Encryption Model (Bitwarden-style)" and "Crypto Flow Reference" sections in the product documentation.
+
+**Summary:**
+- All authentication and encryption is handled client-side; the server never sees user plaintext secrets or master password.
+- Authentication is performed by validating a hash of the derived master key (`authHash`).
+- All secret data is always encrypted before transmission and at rest.
+- If a user forgets their master password, their data is unrecoverable (true zero-knowledge).
 
 **Decision:** Use Fly.io as the primary hosting platform for POC and initial production.
 
@@ -20,16 +29,6 @@ This document outlines the infrastructure decisions, hosting architecture, and d
 - **Private networking** - Apps communicate securely over internal network
 - **Low cost for POC** - Free tier covers development, ~$25-35/mo for production start
 - **No vendor lock-in** - Standard Docker containers, easy to migrate
-
-### Alternatives Considered
-
-| Platform            | Pros                                                                | Cons                                      | Why Not Chosen                                             |
-|---------------------|---------------------------------------------------------------------|-------------------------------------------|------------------------------------------------------------|
-| Railway             | Simplest deployment, GitHub auto-deploy, great Python support       | US-only, less control                     | Good alternative, but Fly.io offers more global reach      |
-| Render              | Free tier, Heroku-like, native Python support                       | Cold starts on free tier                  | Acceptable but Fly.io better DX                            |
-| Heroku              | Best Python DX historically                                         | More expensive, limited free tier         | Cost too high for POC                                      |
-| AWS (EBS/App Runner)| Industry standard, infinite scale                                   | Most complex setup                        | Too much overhead for POC                                  |
-| Cloudflare Workers  | Edge compute, very cheap                                            | Limited Python support (only via Workers) | Limited runtime environment                                |
 
 ---
 
@@ -66,35 +65,11 @@ For proof-of-concept and initial launch:
 
 **Components:**
 - **Frontend:** Single shared-CPU VM serving SPA
-- **Backend:** Single shared-CPU VM running Python API (FastAPI/Flask/Django)
+- **Backend:** Single shared-CPU VM running Python API (FastAPI)
 - **Database:** Single Postgres instance (3-10GB storage)
 
 **No redundancy** - acceptable for POC, auto-restart on crashes (~5 seconds downtime)
 
-### Future: BFF Architecture (Optional)
-
-If needed for multiple client types or enhanced security:
-
-```
-┌─────────────────────────────────────────┐
-│         Fly.io                          │
-│                                         │
-│  Frontend ──public──► BFF API           │
-│                         │               │
-│                      private            │
-│                         │               │
-│                         ▼               │
-│                   Internal API ──► DB   │
-│                   (not public)          │
-└─────────────────────────────────────────┘
-```
-
-**When to add BFF:**
-- Multiple frontends (web + mobile)
-- Complex per-client rate limiting
-- Different auth flows per client type
-
-**Decision:** Not needed for POC, can add later if requirements emerge
 
 ---
 
@@ -194,14 +169,13 @@ If needed for multiple client types or enhanced security:
 - Future: Point-in-time recovery for production
 
 **Migrations:**
-- Alembic (for SQLAlchemy) or Django migrations (for Django ORM)
+- Alembic (for SQLAlchemy)
 - Applied via `fly ssh console` then migration command
 - Or automated via CI/CD deployment step
 
 **Python Database Libraries:**
-- **SQLAlchemy** (if using FastAPI/Flask) - industry standard ORM
+- **SQLAlchemy** - industry standard ORM for FastAPI
 - **asyncpg** or **psycopg3** - for async PostgreSQL drivers
-- **Django ORM** (if using Django) - built-in migrations and ORM
 
 ### Connection Security
 
@@ -284,39 +258,6 @@ Python applications scale well on Fly.io:
 
 ---
 
-## Optional: Cloudflare Integration
-
-### Not Required for POC
-
-Cloudflare can sit in front of Fly.io for additional features:
-
-**What it provides:**
-- DDoS protection (free tier)
-- CDN for static assets
-- Web Application Firewall (paid tiers)
-- Analytics and traffic insights
-- Hide Fly.io origin IPs
-
-**Architecture if added:**
-```
-User → Cloudflare (proxy/CDN) → Fly.io → Database
-```
-
-**Cost:** Free tier available, very generous
-
-**Decision:** Not needed for POC. Add later if:
-- Experiencing attacks
-- Need better analytics
-- Want additional security layer
-- Global performance improvements needed
-
-**What Cloudflare is NOT:**
-- Not a replacement for Fly.io (can't run Python backend)
-- Cloudflare Workers have limited Python support
-- Use as complement, not alternative
-
----
-
 ## Security Considerations
 
 ### Infrastructure Security
@@ -357,21 +298,17 @@ User → Cloudflare (proxy/CDN) → Fly.io → Database
 
 **Backend:**
 - **Language:** Python 3.14+ (or 3.13)
-- **Framework Options:**
-  - **FastAPI** (recommended) - Modern, fast, async, automatic API docs
-  - **Flask** - Lightweight, flexible, mature ecosystem
-  - **Django** - Full-featured, built-in admin, ORM, batteries included
+- **Framework:** FastAPI (modern, async, automatic API docs)
 - **ASGI Server:** uvicorn (for FastAPI/async) or gunicorn
-- **Database ORM:**
-  - SQLAlchemy (FastAPI/Flask)
-  - Django ORM (Django)
+- **Database ORM:** SQLAlchemy
 - **Database Driver:** asyncpg (async) or psycopg3 (sync)
-- **Migrations:** Alembic (SQLAlchemy) or Django migrations
+- **Migrations:** Alembic (SQLAlchemy)
 - **Authentication:** JWT tokens via PyJWT or python-jose
-- **Cryptography:** Python `cryptography` library for server-side validation only
 
 **Frontend:**
-- **Framework:** TBD (React/Svelte/Vue)
+
+**Frontend:**
+- **Framework:** Angular (TypeScript, LTS, Angular 20)
 - **Build tool:** Vite or similar
 - **Cryptography:** WebCrypto API (client)
 
@@ -471,15 +408,6 @@ mypy==1.7.1
 
 ---
 
-## Open Questions
-
-1. **Backend framework choice** - FastAPI (recommended for async, modern) vs Flask (simpler) vs Django (batteries included)
-2. **Frontend framework choice** - React vs Svelte vs Vue
-3. **Region selection** - Which Fly.io region for primary deployment?
-4. **Python version** - 3.14 (latest stable) vs 3.13 (previous stable)
-
-
----
 
 ## Summary
 
@@ -488,3 +416,7 @@ KeyArc's infrastructure strategy uses Fly.io for hosting, providing simple deplo
 The backend is built with Python, leveraging the mature ecosystem of cryptographic libraries (`cryptography`, PyJWT) and modern web frameworks (FastAPI recommended for async performance and developer experience). The platform uses standard Docker containers and PostgreSQL, avoiding vendor lock-in while maintaining operational simplicity.
 
 Fly.io was chosen for its straightforward Docker-based deployment workflow and cost-effective pricing starting at $0 for development and ~$25/month for initial production use.
+
+### Region Selection
+
+For lowest latency to central Mississippi and Atlanta, GA, the primary Fly.io deployment region will be **Ashburn, Virginia (iad)**. This region is closest to both collaborators and provides excellent connectivity for the Southeast US. If capacity is unavailable, fallback options include Dallas, TX (dfw) or Chicago, IL (ord).

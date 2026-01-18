@@ -20,8 +20,9 @@ The core value proposition is simple: store your API keys and certificates secur
 ## Core Features
 
 ### Secure Storage with Client-Side Encryption
-- All secrets encrypted in the browser before being sent to the server
-- Server stores only ciphertext and can never decrypt user data
+- All secrets are encrypted in the browser before being sent to the server
+- The server only ever stores encrypted (ciphertext) secrets—never plaintext or master passwords
+- The server cannot decrypt user data at any time; only the client can decrypt secrets
 - Based on Bitwarden's proven encryption model
 - User only needs to remember a single master password
 
@@ -55,9 +56,55 @@ The core value proposition is simple: store your API keys and certificates secur
 
 ---
 
+## Development Environment Support
+
+KeyArc is designed for a flexible, modern development workflow:
+
+- **Supported OS for development:**
+  - macOS (Apple Silicon/ARM)
+  - Windows (x86/x64)
+- **Development tooling:**
+  - Docker Desktop (for both macOS and Windows)
+  - All containers run Linux (ARM or x86), matching production
+- **Recommended editors:**
+  - Visual Studio Code
+  - Claude Code
+
+This setup ensures that developers on both Mac and Windows can contribute seamlessly, with consistent containerized environments and cross-platform tooling.
+
+---
+
 ## Key Technical Decisions
 
-### Encryption Model (Bitwarden-style)
+### Backend Framework Choice
+
+KeyArc uses **FastAPI** as the backend framework. FastAPI was chosen for its modern async support, automatic OpenAPI documentation, strong performance, and excellent developer experience. Flask and Django were considered, but FastAPI best fits the needs of a secure, API-first, async-enabled product.
+
+#### Authentication & Zero-Knowledge Model (detailed)
+
+KeyArc uses a Bitwarden-style authentication and encryption model, implemented with FastAPI:
+
+- **Signup:**
+	- User enters email and master password in the browser.
+	- Browser derives a `masterKey` using Argon2 (password + email as salt).
+	- Browser generates a random `vaultKey` (AES-256) to encrypt all secrets.
+	- `vaultKey` is encrypted with the `masterKey` and stored on the server.
+	- Browser generates a public/private keypair for sharing; private key is encrypted with the `masterKey` and stored on the server.
+	- Browser computes an `authHash` (hash of the `masterKey`) and sends it to the server along with other encrypted keys.
+
+- **Login:**
+	- User enters email and master password in the browser.
+	- Browser derives the `masterKey` and computes `authHash`.
+	- Browser sends `authHash` to the server (never the password or masterKey).
+	- FastAPI validates `authHash` against the stored value and issues a JWT token.
+	- Server returns encrypted vault key and private key.
+	- Browser uses `masterKey` to decrypt vault key and private key locally.
+
+- **API Usage:**
+	- All further API requests use the JWT for authentication.
+	- All secret data sent to or from the API is always encrypted; server never sees plaintext secrets or user master password.
+
+**Security tradeoff:** If a user forgets their master password, their data is unrecoverable. This is the standard tradeoff for true zero-knowledge systems.
 
 We chose to follow Bitwarden's encryption architecture because it is battle-tested, well-documented, and provides true zero-knowledge security.
 
@@ -91,7 +138,7 @@ The following operations happen exclusively in the browser:
 - API validity testing
 - Key derivation from master password
 
-This minimizes server-side liability and maintains the zero-knowledge guarantee.
+This ensures that secrets are always stored encrypted on the server, minimizing server-side liability and maintaining the zero-knowledge guarantee.
 
 ### No External Integrations (v1)
 
@@ -242,7 +289,7 @@ These may be revisited for future versions based on user feedback and business n
 ## Open Questions for Development Phase
 
 1. **Backend framework** — FastAPI vs Flask vs Django for Python 3.14+ backend
-2. **Frontend framework** — React vs Svelte vs Vue
+2. **Frontend framework** — Angular (TypeScript), LTS (Angular 20)
 3. **Specific cryptographic libraries** — Which implementations of Argon2, AES, RSA/ECC to use client-side
 4. **Python crypto libraries** — `cryptography` vs PyNaCl for server-side validation and key handling
 5. **ORM choice** — SQLAlchemy vs Django ORM vs Tortoise ORM
