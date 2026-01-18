@@ -152,6 +152,40 @@ For proof-of-concept and initial launch:
 
 ---
 
+## Semantic Versioning & Release Strategy
+
+KeyArc follows [Semantic Versioning 2.0.0](https://semver.org/):
+
+**Version format:** `MAJOR.MINOR.PATCH` (e.g., `1.0.0`, `1.2.3`)
+
+### Version Components
+
+- **MAJOR:** Breaking changes (e.g., API breaking changes, database schema incompatibility requiring migration)
+- **MINOR:** New features, backward-compatible (e.g., new secret types, UI improvements)
+- **PATCH:** Bug fixes, security patches (e.g., fixing encryption edge cases, dependency updates)
+
+### Release Cadence
+
+- **POC phase:** Ad-hoc releases as features stabilize
+- **Production:** Minor releases roughly monthly; patches as needed for critical fixes
+- **Versioning starts at:** v0.1.0 (POC phase), v1.0.0 (feature-complete MVP)
+
+### Release Process
+
+1. **Tag on main branch:** `git tag v1.2.3`
+2. **GitHub release:** Create release with changelog on GitHub
+3. **Docker image tagged:** `keyarc:1.2.3` (in addition to `keyarc:latest`)
+4. **Fly.io deployment:** Manual promotion to production (or automatic based on tag)
+5. **Changelog:** Maintained in `CHANGELOG.md` with user-facing summaries of changes
+
+### Branch Strategy
+
+- **main:** Production-ready code, always deployable
+- **work/*:** Feature and bug fix branches, merged to main via PR
+- **release/*:** Release branches for preparing production releases (e.g., `release/1.2.0`)
+
+---
+
 ## Database Strategy
 
 ### PostgreSQL on Fly.io
