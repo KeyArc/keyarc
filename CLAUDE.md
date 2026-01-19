@@ -426,8 +426,9 @@ Expected: Security review checklist for crypto code, general review for other co
 ## References
 
 **Existing Documentation:**
-- Product documentation: `/docs/product-document.md`
-- Infrastructure documentation: `/docs/infrastructure.md`
+- Product documentation: `/docs/PRODUCT.md`
+- Architecture documentation: `/docs/ARCHITECTURE.md`
+- Deployment documentation: `/docs/DEPLOYMENT.md`
 
 **Skills Documentation:**
 - Zero-knowledge architecture: `.claude/skills/keyarc-zero-knowledge/SKILL.md`
