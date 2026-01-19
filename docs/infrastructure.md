@@ -423,26 +423,26 @@ version = "0.1.0"
 description = "Secure, zero-knowledge API key and certificate manager"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi>=0.104.1",
-    "uvicorn[standard]>=0.24.0",
-    "sqlalchemy>=2.0.23",
-    "asyncpg>=0.29.0",
-    "alembic>=1.12.1",
-    "pyjwt>=2.8.0",
-    "cryptography>=41.0.7",
-    "python-multipart>=0.0.6",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy",
+    "asyncpg",
+    "alembic",
+    "pyjwt",
+    "cryptography",
+    "python-multipart",
+    "pydantic",
+    "pydantic-settings",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.3",
-    "pytest-asyncio>=0.21.1",
-    "httpx>=0.25.2",
-    "black>=23.11.0",
-    "ruff>=0.1.6",
-    "mypy>=1.7.1",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+    "black",
+    "ruff",
+    "mypy",
 ]
 ```
 
