@@ -41,7 +41,7 @@ Store API keys and certificates securely, get reminders before they expire, veri
 
 ## Service Architecture
 
-KeyArc follows a "not too micro" microservices approach with clear service boundaries.
+KeyArc follows a right-sized services approach—pragmatic microservices with clear boundaries, avoiding both monolith complexity and microservice sprawl.
 
 ### Services Overview
 

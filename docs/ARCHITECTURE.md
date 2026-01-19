@@ -2,7 +2,7 @@
 
 ## Service Architecture
 
-KeyArc uses a "not too micro" microservices approach with clear service boundaries.
+KeyArc uses a right-sized services approach—pragmatic microservices with clear boundaries, avoiding both monolith complexity and microservice sprawl. Services are split by domain (auth, accounts, keys) rather than by function, keeping the architecture simple while maintaining separation of concerns.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
