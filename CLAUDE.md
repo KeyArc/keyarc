@@ -41,7 +41,7 @@ Store API keys and certificates securely, get reminders before they expire, veri
 
 ## Service Architecture
 
-KeyArc follows a "not too micro" microservices approach with clear service boundaries.
+KeyArc follows a right-sized services approach—pragmatic microservices with clear boundaries, avoiding both monolith complexity and microservice sprawl.
 
 ### Services Overview
 
@@ -426,8 +426,9 @@ Expected: Security review checklist for crypto code, general review for other co
 ## References
 
 **Existing Documentation:**
-- Product documentation: `/docs/product-document.md`
-- Infrastructure documentation: `/docs/infrastructure.md`
+- Product documentation: `/docs/PRODUCT.md`
+- Architecture documentation: `/docs/ARCHITECTURE.md`
+- Deployment documentation: `/docs/DEPLOYMENT.md`
 
 **Skills Documentation:**
 - Zero-knowledge architecture: `.claude/skills/keyarc-zero-knowledge/SKILL.md`
