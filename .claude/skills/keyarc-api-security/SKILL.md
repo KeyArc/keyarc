@@ -7,12 +7,29 @@ description: Use when creating FastAPI endpoints, implementing JWT authenticatio
 
 ## Overview
 
-Security patterns for KeyArc's zero-knowledge FastAPI backend. Covers JWT authentication, encrypted payload validation, audit logging, and OWASP top 10 prevention.
+Security patterns for KeyArc's zero-knowledge FastAPI backend services. Covers JWT authentication, encrypted payload validation, audit logging, and OWASP top 10 prevention.
+
+## Service Architecture Context
+
+KeyArc uses a multi-service architecture:
+
+| Service | Visibility | Security Responsibility |
+|---------|------------|------------------------|
+| **Auth Service** | Public | Issues JWTs, validates authHash, rate limits login |
+| **Gateway** | Public | Validates JWTs, routes to private services |
+| **Account Service** | Private | Trusts Gateway, uses RBAC for team permissions |
+| **Key Service** | Private | Trusts Gateway, uses RBAC, validates encrypted payloads |
+
+**Key security boundaries:**
+- Gateway handles JWT validation - private services trust user context headers from Gateway
+- Auth Service is the only service that validates authHash (never passwords)
+- RBAC checks happen in Account Service and Key Service using shared RBAC module
+- Audit logging is a shared module used by all services
 
 ## When to Use
 
 ✅ **Apply this skill when:**
-- Creating new API endpoints
+- Creating new API endpoints in any service
 - Implementing authentication/authorization
 - Handling secrets or encrypted data
 - Adding audit logging
@@ -33,13 +50,23 @@ Security patterns for KeyArc's zero-knowledge FastAPI backend. Covers JWT authen
 
 Before merging any new endpoint:
 
-- [ ] JWT token validated (use `Depends(get_current_user)`)
-- [ ] User permissions checked (RBAC)
-- [ ] Encrypted payloads validated (no plaintext secrets)
-- [ ] Rate limiting applied (especially auth endpoints)
+**Auth Service endpoints:**
+- [ ] Rate limiting applied (5/minute for login)
+- [ ] authHash validated (never password)
+- [ ] Audit log entry created
+- [ ] Error responses don't leak data
+
+**Gateway:**
+- [ ] JWT token validated
+- [ ] User context headers added for downstream
+- [ ] Invalid tokens rejected with 401
+
+**Account/Key Service endpoints (private):**
+- [ ] User context from Gateway headers (use `Depends(get_current_user_from_gateway)`)
+- [ ] RBAC permissions checked for team operations (use shared RBAC module)
+- [ ] Encrypted payloads validated - no plaintext secrets (Key Service)
 - [ ] Audit log entry created
 - [ ] Error responses don't leak secrets
-- [ ] CORS configured correctly
 - [ ] Input validation with Pydantic
 - [ ] SQL injection prevented (use ORM)
 
@@ -92,25 +119,55 @@ async def get_current_user(
     return user
 ```
 
-## Creating Tokens
+## Creating Tokens (Auth Service Only)
 
 ```python
-# utils/security.py
+# services/auth/app/utils/security.py
 from datetime import datetime, timedelta
 from jose import jwt
 
-SECRET_KEY = os.getenv("SECRET_KEY")  # From environment
+SECRET_KEY = os.getenv("JWT_SECRET")  # From environment
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120  # 2 hours
 
 def create_access_token(data: dict) -> str:
-    """Create JWT access token."""
+    """Create JWT access token. Auth Service only."""
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
 
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 ```
+
+## Gateway User Context
+
+The Gateway validates JWTs and passes user context to private services via headers:
+
+```python
+# Gateway adds these headers after JWT validation:
+# X-User-ID: <user_id>
+# X-User-Email: <email>
+
+# Private services (Account, Key) read user from headers:
+# services/account/app/dependencies.py or services/keys/app/dependencies.py
+
+from fastapi import Header, HTTPException
+
+async def get_current_user_from_gateway(
+    x_user_id: str = Header(..., alias="X-User-ID"),
+    x_user_email: str = Header(None, alias="X-User-Email"),
+) -> dict:
+    """Get user context from Gateway headers. For private services only."""
+    if not x_user_id:
+        raise HTTPException(401, "Missing user context")
+
+    return {
+        "id": int(x_user_id),
+        "email": x_user_email
+    }
+```
+
+**Important:** Private services should only be accessible via Gateway (Fly.io private networking). They trust Gateway headers because external traffic cannot reach them directly.
 
 ## Secure Endpoint Example
 

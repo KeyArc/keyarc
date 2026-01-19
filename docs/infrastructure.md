@@ -34,38 +34,105 @@ KeyArc uses a Bitwarden-style authentication and encryption model, implemented w
 
 ## Architecture
 
-### POC Architecture (Simple)
+### Service Architecture
 
-For proof-of-concept and initial launch:
+KeyArc uses a "not too micro" microservices approach with clear service boundaries.
 
 ```
-┌─────────────────────────────────────┐
-│         Fly.io (Single Region)      │
-│                                     │
-│          ┌───────────────┐          │
-│          │    Frontend   │          │
-│          │    (SPA)      │          │
-│          └──────┬────────┘          │
-│                 │                   │
-│                 │ HTTPS (public)    │
-│                 │                   │
-│          ┌──────▼────────┐          │
-│          │   Backend API │          │
-│          │   (Python)    │          │
-│          └──────┬────────┘          │
-│                 │                   │
-│                 │ private network   │
-│                 │                   │
-│          ┌──────▼─────────┐         │
-│          │  PostgreSQL    │         │
-│          │  (Fly Postgres)│         │
-│          └────────────────┘         │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Fly.io (Single Region)                      │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │                    PUBLIC (internet)                         │   │
+│  │                                                              │   │
+│  │   ┌──────────────┐   ┌──────────────┐    ┌────────────┐     │   │
+│  │   │   Frontend   │   │ Auth Service │    │  Gateway   │     │   │
+│  │   │  (Angular)   │   │  (FastAPI)   │    │ (FastAPI)  │     │   │
+│  │   │ keyarc.io    │   │auth.keyarc.io│    │api.keyarc.io     │   │
+│  │   └──────────────┘   └──────────────┘    └─────┬──────┘     │   │
+│  │                             │                  │            │   │
+│  └─────────────────────────────│──────────────────│────────────┘   │
+│                                │                  │                │
+│  ┌─────────────────────────────│──────────────────│────────────┐   │
+│  │                    PRIVATE (.flycast)          │            │   │
+│  │                             │           ┌──────┴──────┐     │   │
+│  │                             │           │  /account/* │     │   │
+│  │                             │           ▼             ▼     │   │
+│  │                             │    ┌──────────┐ ┌──────────┐  │   │
+│  │                             │    │ Account  │ │   Key    │  │   │
+│  │                             │    │ Service  │ │ Service  │  │   │
+│  │                             │    └────┬─────┘ └────┬─────┘  │   │
+│  │                             │         │           │         │   │
+│  │    ┌────────────────┐       │         │           │         │   │
+│  │    │  PostgreSQL    │◄──────┴─────────┴───────────┘         │   │
+│  │    │postgres.flycast│                                       │   │
+│  │    └────────────────┘                                       │   │
+│  │                                                             │   │
+│  │    Shared Modules: [Audit Logging] [RBAC]                   │   │
+│  │                                                             │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Components:**
+### Services Overview
+
+| Service | Visibility | URL | Responsibility |
+|---------|------------|-----|----------------|
+| **Frontend** | Public | keyarc.io | Angular SPA, static files |
+| **Auth Service** | Public | auth.keyarc.io | Signup, login, password reset, token refresh |
+| **Gateway** | Public | api.keyarc.io | JWT validation, routing to private services |
+| **Account Service** | Private | account.flycast | User profiles, teams, memberships |
+| **Key Service** | Private | keys.flycast | Encrypted secrets, folders, tags |
+| **PostgreSQL** | Private | postgres.flycast | Shared database |
+
+### Service Details
+
+**Frontend (keyarc.io)**
+- Angular SPA served as static files
+- Not behind the Gateway (no JWT needed to load)
+- Handles all client-side cryptography
+
+**Auth Service (auth.keyarc.io)**
+- Public-facing, handles unauthenticated flows
+- Signup, login, password reset, token refresh
+- Issues JWT tokens after successful authentication
+- Future: OAuth provider callbacks (Google, GitHub)
+
+**Gateway (api.keyarc.io)**
+- Thin, stateless, lambda-like proxy
+- Validates JWT tokens on all requests
+- Extracts user context and adds to request headers
+- Routes to Account Service or Key Service based on path
+- No database connections
+
+**Account Service (account.flycast)**
+- Private, only accessible via Gateway
+- User profile management
+- Team CRUD and membership management
+- Uses shared RBAC module for permission checks
+
+**Key Service (keys.flycast)**
+- Private, only accessible via Gateway
+- Encrypted secret storage and retrieval
+- Folder and tag management
+- Expiry tracking (computed on-demand, no background workers)
+- Uses shared RBAC module for team secret permissions
+
+### Shared Modules
+
+Both Account Service and Key Service use shared Python modules:
+
+- **Audit Logging Module**: Writes to shared audit_log table
+- **RBAC Module**: Checks team role permissions (owner, admin, member)
+
+### POC Resource Allocation
+
+**Components (POC):**
 - **Frontend:** Single shared-CPU VM serving SPA
-- **Backend:** Single shared-CPU VM running Python API (FastAPI)
+- **Auth Service:** Single shared-CPU VM
+- **Gateway:** Single shared-CPU VM (minimal resources)
+- **Account Service:** Single shared-CPU VM
+- **Key Service:** Single shared-CPU VM
 - **Database:** Single Postgres instance (3-10GB storage)
 
 **No redundancy** - acceptable for POC, auto-restart on crashes (~5 seconds downtime)
@@ -80,7 +147,8 @@ For proof-of-concept and initial launch:
 ### DNS Configuration
 
 - **Frontend:** `keyarc.io` and `www.keyarc.io`
-- **Backend API:** `api.keyarc.io`
+- **Auth Service:** `auth.keyarc.io`
+- **Gateway (API):** `api.keyarc.io`
 - **SSL Certificates:** Free via Let's Encrypt (automatic renewal)
 
 ### Setup Steps
@@ -101,20 +169,37 @@ For proof-of-concept and initial launch:
 ### Public vs Private
 
 **Public (internet-accessible):**
-- Frontend app (keyarc.io)
-- Backend API (api.keyarc.io)
+- Frontend app (keyarc.io) - Static SPA
+- Auth Service (auth.keyarc.io) - Unauthenticated flows
+- Gateway (api.keyarc.io) - JWT validation + routing
 
 **Private (internal Fly.io network only):**
-- PostgreSQL database
-- Any future internal services
+- Account Service (account.flycast) - User/team management
+- Key Service (keys.flycast) - Secret management
+- PostgreSQL database (postgres.flycast)
 
 ### Fly.io Private Networking
 
-- Apps communicate via `.flycast` internal domains
-- Example: Backend connects to `postgres.flycast`
-- Never exposed to public internet
+- Private services communicate via `.flycast` internal domains
+- Gateway routes to `account.flycast` and `keys.flycast`
+- All services connect to `postgres.flycast`
+- Private services never exposed to public internet
 - No additional cost
 - Automatic service discovery
+
+### Traffic Flow
+
+```
+Internet Traffic:
+  keyarc.io         → Frontend (static files)
+  auth.keyarc.io    → Auth Service (signup, login)
+  api.keyarc.io/*   → Gateway → Account/Key Service
+
+Internal Traffic (via .flycast):
+  Gateway           → account.flycast (user/team endpoints)
+  Gateway           → keys.flycast (secret endpoints)
+  All services      → postgres.flycast (database)
+```
 
 ---
 
@@ -127,15 +212,25 @@ For proof-of-concept and initial launch:
 **Workflow:**
 1. Developer pushes code to GitHub main branch
 2. GitHub Actions triggers
-3. Run automated tests (pytest for backend, frontend tests)
-4. Deploy to Fly.io via official Actions (builds Docker image)
-5. Fly.io deploys container (rolling deployment, zero downtime)
+3. Run automated tests (pytest for services, frontend tests)
+4. Deploy changed services to Fly.io via official Actions
+5. Fly.io deploys containers (rolling deployment, zero downtime)
 
 **Requirements:**
 - Fly.io API token stored in GitHub Secrets
-- Separate workflows for frontend and backend
+- Separate workflows per service (auth, gateway, account, keys, frontend)
 - Path-based triggers (only deploy what changed)
-- Dockerfile for backend Python application
+- Dockerfile for each Python service
+
+**Service Deployment Matrix:**
+
+| Service | Fly App Name | Trigger Path |
+|---------|--------------|--------------|
+| Frontend | keyarc-frontend | `frontend/**` |
+| Auth Service | keyarc-auth | `services/auth/**`, `shared/**` |
+| Gateway | keyarc-gateway | `services/gateway/**` |
+| Account Service | keyarc-account | `services/account/**`, `shared/**` |
+| Key Service | keyarc-keys | `services/keys/**`, `shared/**` |
 
 **Decision:** Set up GitHub Actions early for consistent deployment process
 
@@ -222,18 +317,53 @@ KeyArc follows [Semantic Versioning 2.0.0](https://semver.org/):
 
 ## Secrets Management
 
+### Fly.io Secrets
+
+KeyArc uses Fly.io's built-in secrets management:
+- Encrypted at rest
+- Not visible in `fly.toml`, logs, or deploy output
+- Simple CLI management
+- Per-app isolation
+
 ### Application Secrets
 
-Stored as Fly.io secrets (encrypted at rest):
+Stored as Fly.io secrets (injected as environment variables at runtime):
 - Database connection strings
 - JWT signing keys
 - Any API keys for third-party services
 
+**Per-Service Secrets:**
+
+| Service | Required Secrets |
+|---------|------------------|
+| Auth Service | `DATABASE_URL`, `JWT_SECRET` |
+| Gateway | `JWT_SECRET` (for validation only) |
+| Account Service | `DATABASE_URL` |
+| Key Service | `DATABASE_URL` |
+
 **Management:**
 ```bash
-fly secrets set JWT_SECRET=xxx --app keyarc-api
-fly secrets set DATABASE_URL=postgresql://... --app keyarc-api
+# Set secrets per service
+fly secrets set JWT_SECRET=xxx --app keyarc-auth
+fly secrets set DATABASE_URL=postgresql://... --app keyarc-auth
+fly secrets set JWT_SECRET=xxx --app keyarc-gateway
+fly secrets set DATABASE_URL=postgresql://... --app keyarc-account
+fly secrets set DATABASE_URL=postgresql://... --app keyarc-keys
+
+# List secrets (values hidden)
+fly secrets list --app keyarc-auth
+
+# Remove a secret
+fly secrets unset OLD_SECRET --app keyarc-auth
 ```
+
+### Security Best Practices
+
+Since secrets are injected as environment variables:
+- **Never log environment variables** - sanitize logs
+- **Don't include in error messages** - use generic errors
+- **Don't expose in stack traces** - configure error handling
+- **Access via `os.getenv()`** - don't hardcode fallbacks with real values
 
 ### User Secrets (KeyArc Data)
 
@@ -248,9 +378,9 @@ fly secrets set DATABASE_URL=postgresql://... --app keyarc-api
 
 ### Built-in Fly.io Features
 
-- **Logs:** `fly logs --app keyarc-api`
-- **Metrics:** Dashboard shows CPU, memory, request rates
-- **Health checks:** Automatic HTTP health endpoint monitoring
+- **Logs:** `fly logs --app keyarc-<service>` (auth, gateway, account, keys)
+- **Metrics:** Dashboard shows CPU, memory, request rates per service
+- **Health checks:** Automatic HTTP health endpoint monitoring (`/health`)
 - **Alerts:** Email notifications for app crashes
 
 ### Python-Specific Monitoring
@@ -271,17 +401,23 @@ fly secrets set DATABASE_URL=postgresql://... --app keyarc-api
 ### POC / Development (Free Tier)
 
 - Frontend VM: Free (within allowance)
-- Backend VM: Free (within allowance)
+- Auth Service VM: Free (within allowance)
+- Gateway VM: Free (within allowance)
+- Account Service VM: Free (within allowance)
+- Key Service VM: Free (within allowance)
 - Postgres 3GB: Free (within allowance)
-- **Total: $0/month**
+- **Total: $0/month** (may exceed free tier with 5 VMs)
 
 ### Initial Production
 
 - Frontend VM (shared-cpu-1x): ~$5/mo
-- Backend VM (shared-cpu-1x): ~$5/mo
+- Auth Service VM (shared-cpu-1x): ~$5/mo
+- Gateway VM (shared-cpu-1x): ~$3/mo (minimal resources)
+- Account Service VM (shared-cpu-1x): ~$5/mo
+- Key Service VM (shared-cpu-1x): ~$5/mo
 - Postgres 10GB: ~$15/mo
 - Bandwidth: Included (up to 100GB)
-- **Total: ~$25/month**
+- **Total: ~$38/month**
 
 ### Scaling Considerations
 
@@ -305,7 +441,9 @@ Python applications scale well on Fly.io:
 
 - **Zero-knowledge architecture:** Server never sees plaintext secrets (handled at application layer)
 - **Client-side encryption:** All crypto operations in browser
-- **Private networking:** Database accessible only via Fly.io internal network
+- **Private networking:** Account and Key services accessible only via Gateway
+- **Gateway authentication:** All API requests validated at Gateway before reaching services
+- **RBAC enforcement:** Shared module enforces team role permissions
 
 ### Python Security Best Practices
 
@@ -328,9 +466,18 @@ Python applications scale well on Fly.io:
 - **CI/CD:** GitHub Actions
 - **Container:** Docker (Python base image)
 
+### Service Architecture
+
+- **Frontend:** Angular SPA (keyarc.io)
+- **Auth Service:** FastAPI - signup, login, token management (auth.keyarc.io)
+- **Gateway:** FastAPI/Starlette - JWT validation, routing (api.keyarc.io)
+- **Account Service:** FastAPI - user/team management (private)
+- **Key Service:** FastAPI - secret management (private)
+- **Shared Modules:** Audit logging, RBAC
+
 ### Application Layer
 
-**Backend:**
+**Backend Services:**
 - **Language:** Python 3.14+ (or 3.13)
 - **Framework:** FastAPI (modern, async, automatic API docs)
 - **ASGI Server:** uvicorn (for FastAPI/async) or gunicorn
@@ -451,11 +598,17 @@ dev = [
 
 ## Summary
 
-KeyArc's infrastructure strategy uses Fly.io for hosting, providing simple deployment via Docker, managed PostgreSQL, automatic HTTPS, and global edge capabilities. The architecture is intentionally minimal for the POC phase, with single instances of frontend, backend, and database running in a single region.
+KeyArc's infrastructure strategy uses Fly.io for hosting, providing simple deployment via Docker, managed PostgreSQL, automatic HTTPS, and global edge capabilities. The architecture follows a "not too micro" microservices approach with five services:
 
-The backend is built with Python, leveraging the mature ecosystem of cryptographic libraries (`cryptography`, PyJWT) and modern web frameworks (FastAPI recommended for async performance and developer experience). The platform uses standard Docker containers and PostgreSQL, avoiding vendor lock-in while maintaining operational simplicity.
+- **Frontend** (public) - Angular SPA
+- **Auth Service** (public) - Authentication and token management
+- **Gateway** (public) - JWT validation and request routing
+- **Account Service** (private) - User and team management
+- **Key Service** (private) - Secret management
 
-Fly.io was chosen for its straightforward Docker-based deployment workflow and cost-effective pricing starting at $0 for development and ~$25/month for initial production use.
+The backend services are built with Python/FastAPI, leveraging the mature ecosystem of cryptographic libraries (`cryptography`, PyJWT) and modern async web frameworks. Shared modules for audit logging and RBAC keep services consistent without adding extra microservices. The platform uses standard Docker containers and PostgreSQL, avoiding vendor lock-in while maintaining operational simplicity.
+
+Fly.io was chosen for its straightforward Docker-based deployment workflow and cost-effective pricing starting at $0 for development and ~$38/month for initial production use.
 
 ### Region Selection
 
