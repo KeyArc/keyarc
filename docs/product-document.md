@@ -286,17 +286,6 @@ These may be revisited for future versions based on user feedback and business n
 
 ---
 
-## Open Questions for Development Phase
-
-1. **Backend framework** — FastAPI vs Flask vs Django for Python 3.14+ backend
-2. **Frontend framework** — Angular (TypeScript), LTS (Angular 20)
-3. **Specific cryptographic libraries** — Which implementations of Argon2, AES, RSA/ECC to use client-side
-4. **Python crypto libraries** — `cryptography` vs PyNaCl for server-side validation and key handling
-5. **ORM choice** — SQLAlchemy vs Django ORM vs Tortoise ORM
-6. **MVP feature prioritization** — Exact scope for first usable version
-
----
-
 ## Summary
 
 KeyArc addresses a real gap: developers and small teams need a simple, secure way to manage API keys and certificates without enterprise complexity or trusting a server with their plaintext secrets. By following Bitwarden's proven encryption model and focusing on the specific needs of credential management (expiry tracking, validity testing, rotation reminders), we can deliver a focused product that does one thing well.
