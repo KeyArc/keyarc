@@ -30,6 +30,7 @@ Store API keys and certificates securely, get reminders before they expire, veri
 **Infrastructure:**
 - Docker (containerization)
 - Fly.io (hosting platform)
+- Fly.io Secrets (application secrets management)
 - GitHub Actions (CI/CD)
 
 **Security:**
@@ -37,6 +38,122 @@ Store API keys and certificates securely, get reminders before they expire, veri
 - Argon2 (password-based key derivation)
 - AES (symmetric encryption)
 - RSA/ECC (asymmetric encryption for sharing)
+
+## Service Architecture
+
+KeyArc follows a "not too micro" microservices approach with clear service boundaries.
+
+### Services Overview
+
+| Service | Visibility | URL | Responsibility |
+|---------|------------|-----|----------------|
+| **Frontend** | Public | keyarc.io | Angular SPA, static files |
+| **Auth Service** | Public | auth.keyarc.io | Signup, login, password reset, token refresh |
+| **Gateway** | Public | api.keyarc.io | JWT validation, routing to private services |
+| **Account Service** | Private | account.flycast | User profiles, teams, memberships, invitations |
+| **Key Service** | Private | keys.flycast | Encrypted secrets, folders, tags, sharing |
+
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Fly.io                                      │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │                    PUBLIC (internet)                         │   │
+│  │                                                              │   │
+│  │   ┌──────────────┐   ┌──────────────┐    ┌────────────┐     │   │
+│  │   │   Frontend   │   │ Auth Service │    │  Gateway   │     │   │
+│  │   │  (Angular)   │   │  (FastAPI)   │    │ (FastAPI)  │     │   │
+│  │   │ keyarc.io    │   │auth.keyarc.io│    │api.keyarc.io     │   │
+│  │   └──────────────┘   └──────────────┘    └─────┬──────┘     │   │
+│  │                             │                  │            │   │
+│  └─────────────────────────────│──────────────────│────────────┘   │
+│                                │                  │                │
+│  ┌─────────────────────────────│──────────────────│────────────┐   │
+│  │                    PRIVATE (.flycast)          │            │   │
+│  │                             │           ┌──────┴──────┐     │   │
+│  │                             │           │  /account/* │     │   │
+│  │                             │           ▼             ▼     │   │
+│  │                             │    ┌──────────┐ ┌──────────┐  │   │
+│  │                             │    │ Account  │ │   Key    │  │   │
+│  │                             │    │ Service  │ │ Service  │  │   │
+│  │                             │    └────┬─────┘ └────┬─────┘  │   │
+│  │                             │         │           │         │   │
+│  │    ┌────────────────┐       │         │           │         │   │
+│  │    │  PostgreSQL    │◄──────┴─────────┴───────────┘         │   │
+│  │    │postgres.flycast│                                       │   │
+│  │    └────────────────┘                                       │   │
+│  │                                                             │   │
+│  │    Shared Modules: [Audit Logging] [RBAC]                   │   │
+│  │                                                             │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Service Responsibilities
+
+**Auth Service (Public)**
+- Handles unauthenticated flows only
+- Signup with encrypted key storage
+- Login with authHash validation
+- Password reset flow
+- Token refresh
+- Future: OAuth provider callbacks (Google, etc.)
+
+**Gateway (Public)**
+- Thin, stateless, lambda-like
+- Validates JWT tokens
+- Extracts user context (user ID, etc.)
+- Routes requests to private services based on path
+- No database connections
+- Adds user context headers for downstream services
+
+**Account Service (Private)**
+- User profile management
+- Team CRUD operations
+- Team membership management
+- Invitation handling
+- All endpoints require valid JWT (via Gateway)
+
+**Key Service (Private)**
+- Encrypted secret storage
+- Folder and tag management
+- Team secret sharing
+- Expiry tracking (computed on-demand, no background workers)
+- All endpoints require valid JWT (via Gateway)
+
+### Shared Modules
+
+**Audit Logging Module**
+- Used by Auth Service, Account Service, and Key Service
+- Writes to shared audit_log table in PostgreSQL
+- Logs: who, what action, which resource, when, from where
+- Never logs secret values
+
+**RBAC Module**
+- Used by Account Service and Key Service
+- Checks team role permissions (owner, admin, member)
+- Enforces access control at service level
+
+### Traffic Flows
+
+| Action | Flow |
+|--------|------|
+| Signup | Frontend → Auth Service |
+| Login | Frontend → Auth Service |
+| Get profile | Frontend → Gateway → Account Service |
+| Manage team | Frontend → Gateway → Account Service |
+| Get secrets | Frontend → Gateway → Key Service |
+| Update secret | Frontend → Gateway → Key Service |
+
+### Future OAuth Support
+
+The architecture supports adding OAuth providers (Google, GitHub, etc.) while maintaining zero-knowledge:
+- OAuth proves identity (who you are)
+- Vault password still required to decrypt data (access to secrets)
+- Auth Service handles OAuth callbacks
+- Zero-knowledge principle preserved
 
 ## Zero-Knowledge Architecture
 
@@ -173,36 +290,119 @@ KeyArc implements a Bitwarden-inspired zero-knowledge encryption model where:
 
 ## Project Structure
 
-[PLACEHOLDER] Backend directory structure will be defined during implementation.
-Expected: `app/` with `models/`, `routers/`, `schemas/`, `utils/`, `dependencies.py`, `main.py`
+### Repository Layout
 
-[PLACEHOLDER] Frontend directory structure will be defined during implementation.
-Expected: `src/app/` with `components/`, `services/`, `models/`, `guards/`
+```
+keyarc/
+├── frontend/                 # Angular SPA
+│   └── src/app/
+│       ├── components/
+│       ├── services/
+│       ├── models/
+│       └── guards/
+├── services/
+│   ├── auth/                 # Auth Service (FastAPI)
+│   │   ├── app/
+│   │   │   ├── routers/
+│   │   │   ├── schemas/
+│   │   │   └── main.py
+│   │   └── tests/
+│   ├── gateway/              # Gateway Service (FastAPI/Starlette)
+│   │   ├── app/
+│   │   │   ├── routing.py
+│   │   │   └── main.py
+│   │   └── tests/
+│   ├── account/              # Account Service (FastAPI)
+│   │   ├── app/
+│   │   │   ├── routers/
+│   │   │   ├── schemas/
+│   │   │   └── main.py
+│   │   └── tests/
+│   └── keys/                 # Key Service (FastAPI)
+│       ├── app/
+│       │   ├── routers/
+│       │   ├── schemas/
+│       │   └── main.py
+│       └── tests/
+├── shared/                   # Shared modules
+│   ├── models/               # SQLAlchemy models
+│   ├── audit/                # Audit logging module
+│   ├── rbac/                 # RBAC module
+│   └── schemas/              # Shared Pydantic schemas
+├── migrations/               # Alembic migrations
+└── docs/
+```
 
-[PLACEHOLDER] Shared types/contracts between frontend and backend.
-Expected: Matching Pydantic (backend) and TypeScript interfaces (frontend)
+[PLACEHOLDER] Exact structure will be refined during implementation.
 
-[PLACEHOLDER] Testing structure.
-Expected: `tests/` for backend (pytest), `src/app/**/*.spec.ts` for frontend (Jasmine/Karma)
+### Shared Components
 
-[PLACEHOLDER] Database migrations directory.
-Expected: Alembic migrations in `migrations/` or `alembic/`
+- **shared/models/**: SQLAlchemy models shared across services
+- **shared/audit/**: Audit logging functions used by all services
+- **shared/rbac/**: Role-based access control checks
+- **shared/schemas/**: Common Pydantic schemas
+
+### Testing Structure
+
+- Backend: `services/<service>/tests/` using pytest
+- Frontend: `frontend/src/app/**/*.spec.ts` using Jasmine/Karma
+- Integration: TBD
 
 ## API Conventions
 
-[PLACEHOLDER] REST endpoint naming patterns will be established during backend development.
+### Service Endpoints
 
-[PLACEHOLDER] Error handling and response formats.
-Expected: Consistent error responses with status codes, generic messages (no secret leaks)
+**Auth Service (auth.keyarc.io)** - Public, unauthenticated:
+- `POST /signup` - Create account
+- `POST /login` - Authenticate, receive JWT
+- `POST /password-reset` - Request password reset
+- `POST /password-reset/confirm` - Confirm password reset
+- `POST /token/refresh` - Refresh JWT token
 
-[PLACEHOLDER] Authentication flow implementation.
-Expected: JWT tokens in Authorization header, `Depends(get_current_user)` for protected endpoints
+**Gateway (api.keyarc.io)** - Public, requires JWT:
+- `GET/POST/PUT/DELETE /account/*` → Routes to Account Service
+- `GET/POST/PUT/DELETE /keys/*` → Routes to Key Service
 
-[PLACEHOLDER] Rate limiting strategy.
-Expected: Especially on auth endpoints (5 attempts/minute), using SlowAPI or similar
+**Account Service (via Gateway)** - Private:
+- `GET /account/profile` - Get user profile
+- `PUT /account/profile` - Update user profile
+- `GET /account/teams` - List user's teams
+- `POST /account/teams` - Create team
+- `GET /account/teams/:id` - Get team details
+- `POST /account/teams/:id/members` - Invite member
+- `DELETE /account/teams/:id/members/:userId` - Remove member
 
-[PLACEHOLDER] API versioning strategy.
-Expected: v1 prefix or version in headers
+**Key Service (via Gateway)** - Private:
+- `GET /keys/secrets` - List secrets
+- `POST /keys/secrets` - Create secret
+- `GET /keys/secrets/:id` - Get secret
+- `PUT /keys/secrets/:id` - Update secret
+- `DELETE /keys/secrets/:id` - Delete secret
+- `GET /keys/folders` - List folders
+- `POST /keys/folders` - Create folder
+
+[PLACEHOLDER] Exact endpoint paths will be refined during implementation.
+
+### Error Handling
+
+- Consistent error responses with status codes
+- Generic messages that don't leak sensitive data
+- Format: `{"detail": "Error message"}`
+
+### Authentication
+
+- JWT tokens in `Authorization: Bearer <token>` header
+- Gateway validates JWT and adds user context headers
+- Private services trust Gateway's user context headers
+
+### Rate Limiting
+
+- Auth endpoints: 5 attempts/minute per IP (using SlowAPI)
+- API endpoints: Higher limits based on plan
+
+### API Versioning
+
+Expected: v1 prefix (e.g., `/v1/keys/secrets`) or version in headers
 
 ## Development Standards
 

@@ -76,6 +76,26 @@ This setup ensures that developers on both Mac and Windows can contribute seamle
 
 ## Key Technical Decisions
 
+### Service Architecture
+
+KeyArc uses a "not too micro" microservices architecture:
+
+| Service | Visibility | Purpose |
+|---------|------------|---------|
+| **Auth Service** | Public | Signup, login, password reset, token management |
+| **Gateway** | Public | JWT validation, routing to private services |
+| **Account Service** | Private | User profiles, teams, memberships |
+| **Key Service** | Private | Encrypted secrets, folders, tags, sharing |
+
+**Key design decisions:**
+- **Gateway pattern**: All authenticated API requests go through the Gateway, which validates JWTs and routes to private services
+- **Auth Service public**: Unauthenticated flows (signup, login) need a public endpoint
+- **Shared modules**: Audit logging and RBAC are shared modules, not separate services
+- **No background workers**: Expiry tracking is computed on-demand when users view secrets
+- **Future OAuth ready**: Architecture supports adding Google/GitHub login while preserving zero-knowledge (OAuth proves identity, vault password still required for decryption)
+
+For detailed infrastructure documentation, see `/docs/infrastructure.md`.
+
 ### Backend Framework Choice
 
 KeyArc uses **FastAPI** as the backend framework. FastAPI was chosen for its modern async support, automatic OpenAPI documentation, strong performance, and excellent developer experience. Flask and Django were considered, but FastAPI best fits the needs of a secure, API-first, async-enabled product.

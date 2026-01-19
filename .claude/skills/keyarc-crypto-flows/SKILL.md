@@ -9,6 +9,11 @@ description: Use when implementing signup flow, login flow, team sharing, key de
 
 Implementation patterns for KeyArc's three core cryptographic workflows: signup, login, and team sharing. Provides code examples for Argon2 key derivation, AES-GCM encryption, and RSA-OAEP key sharing.
 
+**All cryptographic operations happen client-side (browser).** The backend services only receive encrypted data:
+- **Auth Service** receives: authHash, encrypted vaultKey, encrypted privateKey, publicKey
+- **Key Service** receives: encrypted secrets (ciphertext only)
+- **Account Service** receives: encrypted teamKey copies (for team sharing)
+
 ## When to Use
 
 ✅ **Use this skill for:**
@@ -317,3 +322,12 @@ try {
 7. **Testing**: Verify round-trip and failure cases
 
 **Crypto is hard - follow established patterns exactly.**
+
+## Future: OAuth Support
+
+The architecture supports adding OAuth providers (Google, GitHub) while maintaining zero-knowledge:
+- OAuth proves identity (who you are)
+- Vault password still required for decryption (access to secrets)
+- Flow: OAuth login → Auth Service validates identity → Client prompts for vault password → Derive masterKey → Decrypt vaultKey
+
+This maintains zero-knowledge because the OAuth provider and server never see the vault password or masterKey.

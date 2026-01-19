@@ -10,6 +10,11 @@ description: Use when implementing client-side encryption, master key derivation
 
 KeyArc implements Bitwarden-style zero-knowledge encryption where ALL cryptographic operations happen client-side. The server stores only encrypted ciphertext and authentication hashes.
 
+**This applies to all backend services:**
+- **Auth Service** - stores encrypted keys, validates authHash (not passwords)
+- **Account Service** - stores encrypted teamKey copies
+- **Key Service** - stores encrypted secrets (ciphertext only)
+
 ## Iron Law
 **NEVER SEND PLAINTEXT SECRETS OR MASTER PASSWORDS TO THE SERVER**
 
