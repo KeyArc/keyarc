@@ -3,26 +3,11 @@ name: CI
 on:
   push:
     branches: [main]
-    paths:
-      - "services/**"
-      - "shared/**"
-      - "frontend/**"
-      - "pyproject.toml"
-      - "**/Dockerfile"
-      - "**/*.dockerfile"
-      - "docker-compose*.yml"
-      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "services/**"
-      - "shared/**"
-      - "frontend/**"
-      - "pyproject.toml"
-      - "**/Dockerfile"
-      - "**/*.dockerfile"
-      - "docker-compose*.yml"
-      - ".github/workflows/ci.yml"
+
+# Note: Path filtering is handled by the 'changes' job using dorny/paths-filter.
+# This ensures ci-status always reports, even for docs-only PRs.
 
 permissions:
   contents: read
