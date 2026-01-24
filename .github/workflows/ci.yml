@@ -156,12 +156,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         if: steps.check-frontend.outputs.exists == 'true'
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         if: steps.check-frontend.outputs.exists == 'true'
@@ -197,7 +195,7 @@ jobs:
 
       - name: Run hadolint
         if: steps.find-dockerfiles.outputs.exists == 'true'
-        uses: hadolint/hadolint-action@v3
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ${{ steps.find-dockerfiles.outputs.files }}
           ignore: ${{ env.HADOLINT_IGNORE }}
