@@ -182,27 +182,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Find Dockerfiles
-        id: find-dockerfiles
+      - name: Check if Dockerfiles exist
+        id: check-dockerfiles
         run: |
-          files=$(find . -name "Dockerfile" -o -name "*.dockerfile" 2>/dev/null | tr '\n' ' ')
-          if [ -n "$files" ]; then
-            echo "files=$files" >> $GITHUB_OUTPUT
+          if find . -name "Dockerfile" -o -name "*.dockerfile" 2>/dev/null | grep -q .; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Run hadolint
-        if: steps.find-dockerfiles.outputs.exists == 'true'
+        if: steps.check-dockerfiles.outputs.exists == 'true'
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: ${{ steps.find-dockerfiles.outputs.files }}
+          recursive: true
           ignore: ${{ env.HADOLINT_IGNORE }}
           failure-threshold: ${{ env.HADOLINT_FAILURE_THRESHOLD }}
 
       - name: Skip - No Dockerfiles found
-        if: steps.find-dockerfiles.outputs.exists == 'false'
+        if: steps.check-dockerfiles.outputs.exists == 'false'
         run: echo "No Dockerfiles found - skipping Docker lint"
 
   # Summary job for branch protection
