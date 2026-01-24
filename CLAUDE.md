@@ -434,6 +434,7 @@ Expected: Security review checklist for crypto code, general review for other co
 - Zero-knowledge architecture: `.claude/skills/keyarc-zero-knowledge/SKILL.md`
 - Cryptographic flows: `.claude/skills/keyarc-crypto-flows/SKILL.md`
 - API security: `.claude/skills/keyarc-api-security/SKILL.md`
+- GitHub issues: `.claude/skills/github-issues/SKILL.md`
 
 **Future Documentation:**
 [PLACEHOLDER] API documentation (OpenAPI/Swagger) will be generated
@@ -471,6 +472,53 @@ Expected: Security review checklist for crypto code, general review for other co
 3. **Security review** - All crypto code requires review
 4. **Audit logging** - Every secret access must be logged
 5. **Zero-knowledge enforcement** - Use KeyArc security skills
+6. **Update project board** - When starting work on GitHub issues, update status on the project board
+
+### GitHub Project Board Updates
+
+When working on GitHub issues, update the project board status. **Note:** Only move issues to "In Progress" or "Ready" - never mark issues as "Done" (that's for manual review).
+
+**Starting work on an issue:**
+```bash
+# Get the project item ID for the issue
+gh project item-list 1 --owner KeyArc --format json | jq '.items[] | select(.content.number == ISSUE_NUMBER) | .id'
+
+# Update status to "In Progress"
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwDODzuJ-c4BNYGm"
+    itemId: "ITEM_ID"
+    fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y71s"
+    value: {singleSelectOptionId: "b3644764"}
+  }) { projectV2Item { id } }
+}'
+```
+
+**Unblocking an issue (moving to Ready):**
+```bash
+# Update status to "Ready" when dependencies are resolved
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwDODzuJ-c4BNYGm"
+    itemId: "ITEM_ID"
+    fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y71s"
+    value: {singleSelectOptionId: "e5dd8d9b"}
+  }) { projectV2Item { id } }
+}'
+```
+
+**Status option IDs:**
+- Ready: `e5dd8d9b`
+- Blocked: `a149a0a4`
+- In Progress: `b3644764`
+- Done: `f3192413` (manual only - do not use programmatically)
+
+**Project reference:**
+- Project ID: `PVT_kwDODzuJ-c4BNYGm`
+- Status field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y71s`
+- Project URL: https://github.com/orgs/KeyArc/projects/1
 
 ## Quick Start (When Codebase Exists)
 
