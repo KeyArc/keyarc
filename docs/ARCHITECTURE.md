@@ -181,6 +181,9 @@ KeyArc uses a right-sized services approach—pragmatic microservices with clear
 **Frontend:**
 - Angular 20
 - TypeScript
+- Angular Material (forms, tables, dialogs, datepickers)
+- TailwindCSS (layout, spacing, custom components)
+- CSS custom properties (unified theming)
 - WebCrypto API
 
 **Cryptography:**

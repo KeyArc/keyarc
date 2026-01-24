@@ -87,6 +87,11 @@ Create the Angular project structure for the frontend.
       ├── guards/
       └── shared/
   ```
+- Styling setup (hybrid approach):
+  - Angular Material for complex components (forms, tables, dialogs)
+  - TailwindCSS for layout, spacing, and custom styling
+  - CSS custom properties for unified theming between both
+  - Tailwind config with `preflight: false` to avoid Material conflicts
 - Routing module setup
 - HTTP interceptor stub (for auth headers)
 - Environment configuration (dev/prod)
@@ -94,10 +99,13 @@ Create the Angular project structure for the frontend.
 
 **Acceptance Criteria**:
 - [ ] `ng serve` starts development server
+- [ ] Angular Material installed and configured
+- [ ] TailwindCSS installed with custom theme colors
+- [ ] CSS custom properties defined for shared color palette
 - [ ] Routing configured with lazy loading
 - [ ] HTTP interceptor registered (empty implementation)
 - [ ] Environment files for dev and production
-- [ ] Basic layout renders without errors
+- [ ] Basic layout renders without errors (using both Material and Tailwind)
 
 ---
 

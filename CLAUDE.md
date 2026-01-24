@@ -26,6 +26,9 @@ Store API keys and certificates securely, get reminders before they expire, veri
 **Frontend:**
 - Angular (TypeScript framework)
 - RxJS (reactive programming)
+- Angular Material (complex components: forms, tables, dialogs)
+- TailwindCSS (layout, spacing, custom styling)
+- CSS custom properties (shared theming between Material and Tailwind)
 
 **Infrastructure:**
 - Docker (containerization)
