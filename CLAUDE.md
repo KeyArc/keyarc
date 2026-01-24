@@ -406,11 +406,16 @@ Expected: v1 prefix (e.g., `/v1/keys/secrets`) or version in headers
 
 ## Development Standards
 
-[PLACEHOLDER] Python code style will be defined.
-Expected: Black formatting, isort for imports, pylint for linting
+### Python Code Style
 
-[PLACEHOLDER] TypeScript code style will be defined.
-Expected: ESLint + Prettier, Angular style guide
+- Lint and format with [ruff](https://docs.astral.sh/ruff/) (configured in root `pyproject.toml`)
+- Type check with mypy
+- Run `ruff check .` for linting, `ruff format .` for formatting
+
+### TypeScript Code Style
+
+- ESLint + Angular style guide
+- Strict TypeScript settings
 
 ### Git Workflow
 

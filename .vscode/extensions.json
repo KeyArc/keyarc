@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    // Python
+    "charliermarsh.ruff",
+    "ms-python.python",
+    "ms-python.mypy-type-checker",
+
+    // TypeScript / Angular
+    "dbaeumer.vscode-eslint",
+    "angular.ng-template",
+
+    // Docker
+    "exiasr.hadolint"
+  ]
+}
