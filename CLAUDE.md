@@ -412,13 +412,64 @@ Expected: Black formatting, isort for imports, pylint for linting
 [PLACEHOLDER] TypeScript code style will be defined.
 Expected: ESLint + Prettier, Angular style guide
 
-[PLACEHOLDER] Git commit message format.
-Expected: Conventional Commits (feat:, fix:, docs:, etc.)
+### Git Workflow
 
-[PLACEHOLDER] Branch naming convention.
-Expected: feature/, bugfix/, hotfix/ prefixes
+**Commit Message Format:**
+Use [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages:
 
-[PLACEHOLDER] Pull request template.
+```
+<type>(<scope>): <description> (#<issue-number>)
+
+[optional body]
+
+Closes #<issue-number>
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
+**IMPORTANT:** Always include the issue number in the commit title (e.g., `feat(auth): add login endpoint (#42)`). This ensures PRs automatically link to issues since PR titles default to the commit message.
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+Common scopes: `auth`, `gateway`, `account`, `keys`, `frontend`, `crypto`, `shared`
+
+Examples:
+- `docs: add PR template and contributing guide (#11)`
+- `feat(keys): add folder organization for secrets (#42)`
+- `fix(auth): correct token refresh timing (#15)`
+
+**Branch Naming Convention:**
+Format: `<type>/<issue-number>-<short-description>`
+
+- Issue number MUST be included in branch name
+- Use kebab-case for descriptions
+
+Examples:
+- `feat/42-add-folder-support`
+- `fix/15-login-token-refresh`
+- `docs/11-branch-protection-workflow`
+- `chore/23-update-dependencies`
+
+Types:
+- `feat/` - New features
+- `fix/` - Bug fixes
+- `docs/` - Documentation only
+- `refactor/` - Code refactoring
+- `chore/` - Maintenance tasks
+- `test/` - Test additions/changes
+
+**Before Starting Work on an Issue:**
+1. Checkout and pull main: `git checkout main && git pull`
+2. Create branch with issue number: `git checkout -b <type>/<issue-number>-<description>`
+3. Update project board status to "In Progress" (see GitHub Project Board Updates section)
+
+**Pull Request Process:**
+- PR title must follow conventional commit format (enforced by CI)
+- All PRs require "Validate PR Title" status check to pass
+- PRs are squash-merged to keep history clean
+- Review threads must be resolved before merging
+
+See `CONTRIBUTING.md` for detailed contributing guidelines.
 
 [PLACEHOLDER] Code review checklist.
 Expected: Security review checklist for crypto code, general review for other code
