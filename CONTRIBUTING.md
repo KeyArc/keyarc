@@ -106,21 +106,72 @@ Before submitting a PR that touches security-sensitive code:
 - [ ] Input validation prevents injection attacks
 - [ ] Error messages don't leak sensitive information
 
+## Local Development Setup
+
+### VS Code (Recommended)
+
+Open the project in VS Code and install the recommended extensions when prompted. This configures automatic linting and formatting on save.
+
+To manually install recommended extensions:
+```bash
+code --install-extension charliermarsh.ruff
+code --install-extension ms-python.python
+code --install-extension ms-python.mypy-type-checker
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension angular.ng-template
+code --install-extension exiasr.hadolint
+```
+
+### Running Linters Locally
+
+Run these commands before creating a PR to catch issues early.
+
+**Python:**
+```bash
+# Install tools (once)
+pip install ruff mypy
+
+# Lint and type check
+ruff check services shared
+ruff format --check services shared
+mypy services shared --ignore-missing-imports
+
+# Auto-fix formatting
+ruff format services shared
+```
+
+**TypeScript (from frontend/ directory):**
+```bash
+cd frontend
+npm run lint
+npx tsc --noEmit --skipLibCheck
+```
+
+**Docker:**
+```bash
+# Install hadolint: https://github.com/hadolint/hadolint#install
+hadolint Dockerfile
+hadolint --ignore DL3008 --ignore DL3013 --ignore DL3018 Dockerfile
+```
+
 ## Code Style
 
 ### Python (Backend)
 
 - Follow PEP 8 style guidelines
 - Use type hints for function signatures
-- Format with Black
-- Sort imports with isort
+- Lint and format with [ruff](https://docs.astral.sh/ruff/)
+- Type check with [mypy](https://mypy-lang.org/)
 
 ### TypeScript (Frontend)
 
 - Follow Angular style guide
 - Use strict TypeScript settings
-- Format with Prettier
 - Lint with ESLint
+
+### Docker
+
+- Lint Dockerfiles with [hadolint](https://github.com/hadolint/hadolint)
 
 ## Testing
 
