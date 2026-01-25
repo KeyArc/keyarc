@@ -1,0 +1,49 @@
+<!-- Main layout container -->
+<div class="app-layout">
+  <!-- Header -->
+  <mat-toolbar color="primary" class="app-header">
+    <div class="header-brand">
+      <img src="logo-48.png" alt="KeyArc logo" />
+      <span>KeyArc</span>
+    </div>
+
+    <span class="spacer"></span>
+
+    <button
+      mat-icon-button
+      (click)="toggleTheme()"
+      [attr.aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+      <mat-icon>{{ themeIcon() }}</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <!-- Middle section: sidebar + content -->
+  <div class="app-body">
+    <!-- Sidebar -->
+    <nav class="app-sidebar">
+      <mat-nav-list>
+        @for (item of navItems(); track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="active-link"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </nav>
+
+    <!-- Main content (scrollable) -->
+    <main class="app-main">
+      <router-outlet />
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <mat-toolbar color="primary" class="app-footer">
+    <span>&copy; 2025 KeyArc. Zero-knowledge security.</span>
+  </mat-toolbar>
+</div>

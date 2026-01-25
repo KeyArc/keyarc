@@ -49,17 +49,17 @@ jobs:
         with:
           filters: |
             python:
-              - 'services/**/*.py'
-              - 'shared/**/*.py'
+              - 'src/services/**/*.py'
+              - 'src/shared/**/*.py'
               - 'pyproject.toml'
               - 'requirements*.txt'
             typescript:
-              - 'frontend/**/*.ts'
-              - 'frontend/**/*.html'
-              - 'frontend/package.json'
-              - 'frontend/tsconfig*.json'
-              - 'frontend/.eslintrc*'
-              - 'frontend/eslint.config.*'
+              - 'src/frontends/web/**/*.ts'
+              - 'src/frontends/web/**/*.html'
+              - 'src/frontends/web/package.json'
+              - 'src/frontends/web/tsconfig*.json'
+              - 'src/frontends/web/.eslintrc*'
+              - 'src/frontends/web/eslint.config.*'
             docker:
               - '**/Dockerfile'
               - '**/*.dockerfile'
@@ -77,7 +77,7 @@ jobs:
       - name: Check if Python code exists
         id: check-python
         run: |
-          if find services shared -name "*.py" 2>/dev/null | grep -q .; then
+          if find src/services src/shared -name "*.py" 2>/dev/null | grep -q .; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -109,11 +109,11 @@ jobs:
 
       - name: Run mypy type checker
         if: steps.check-python.outputs.exists == 'true'
-        run: mypy services shared ${{ env.MYPY_ARGS }}
+        run: mypy src/services src/shared ${{ env.MYPY_ARGS }}
 
       - name: Skip - No Python code found
         if: steps.check-python.outputs.exists == 'false'
-        run: echo "No Python files found in services/ or shared/ - skipping lint"
+        run: echo "No Python files found in src/services/ or src/shared/ - skipping lint"
 
   # TypeScript linting and type checking
   typescript-lint:
@@ -123,7 +123,7 @@ jobs:
     if: needs.changes.outputs.typescript == 'true'
     defaults:
       run:
-        working-directory: frontend
+        working-directory: src/frontends/web
     steps:
       - uses: actions/checkout@v6
 
@@ -144,7 +144,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.check-frontend.outputs.exists == 'true'
-        run: npm install
+        run: npm ci
 
       - name: Run ESLint
         if: steps.check-frontend.outputs.exists == 'true'
@@ -156,7 +156,7 @@ jobs:
 
       - name: Skip - No frontend found
         if: steps.check-frontend.outputs.exists == 'false'
-        run: echo "No frontend/package.json found - skipping TypeScript lint"
+        run: echo "No src/frontends/web/package.json found - skipping TypeScript lint"
 
   # Docker linting
   docker-lint:

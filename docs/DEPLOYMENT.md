@@ -8,8 +8,8 @@
 
 ### Public Services
 - Frontend (keyarc.io) - Static SPA
-- Auth Service (auth.keyarc.io) - Unauthenticated flows
-- Gateway (api.keyarc.io) - JWT validation + routing
+- Auth Service (keyarc.io/auth) - Unauthenticated flows
+- Gateway (keyarc.io/api) - JWT validation + routing
 
 ### Private Services (via .flycast)
 - Account Service (account.flycast)
@@ -20,8 +20,8 @@
 ```
 Internet:
   keyarc.io         → Frontend
-  auth.keyarc.io    → Auth Service
-  api.keyarc.io/*   → Gateway → Account/Key Service
+  keyarc.io/auth/*  → Auth Service
+  keyarc.io/api/*   → Gateway → Account/Key Service
 
 Internal:
   Gateway           → account.flycast, keys.flycast

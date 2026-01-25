@@ -1,0 +1,105 @@
+/* Layout component styles */
+
+/* Main app layout - fills viewport */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header */
+.app-header {
+  flex-shrink: 0;
+  padding: 0 1.5rem;
+}
+
+/* Toolbar spacer */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Header brand */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  img {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 1.25rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+/* Middle section: sidebar + content */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.app-sidebar {
+  width: 18rem;
+  flex-shrink: 0;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1rem 0;
+}
+
+/* Nav list items */
+mat-nav-list {
+  a[mat-list-item] {
+    color: var(--text-primary) !important;
+    margin: 0.25rem 0.75rem;
+
+    .mat-mdc-list-item-title,
+    .mdc-list-item__primary-text,
+    span[matListItemTitle] {
+      color: var(--text-primary) !important;
+    }
+
+    mat-icon {
+      color: var(--text-secondary) !important;
+    }
+
+    &:hover {
+      background-color: var(--border);
+    }
+  }
+}
+
+/* Active navigation link */
+.active-link {
+  background-color: rgba(var(--mat-sys-primary-rgb), 0.1);
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
+}
+
+/* Main content (scrollable) */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--background);
+  color: var(--text-primary);
+  padding: 2rem;
+}
+
+/* Footer */
+.app-footer {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  min-height: 2rem !important;
+  height: 2rem;
+}

@@ -1,0 +1,72 @@
+/* Dashboard component styles */
+
+/* Container with consistent vertical spacing between all children */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Card grid layout */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Welcome message section */
+.welcome-message {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 2rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+  }
+
+  p {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+}
+
+/* Material cards - use theme colors */
+mat-card {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+  padding: 0.5rem;
+
+  mat-card-header {
+    margin-bottom: 1rem;
+  }
+
+  mat-card-title {
+    color: var(--text-primary) !important;
+  }
+
+  mat-card-subtitle {
+    color: var(--text-secondary) !important;
+  }
+
+  mat-card-content {
+    color: var(--text-primary) !important;
+  }
+}
+
+/* Text utilities */
+.text-secondary {
+  color: var(--text-secondary);
+}
