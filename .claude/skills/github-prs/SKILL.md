@@ -37,9 +37,29 @@ Use the GitHub MCP server tools instead of `gh` CLI when available:
 | Get PR diff | `mcp__github__pull_request_read` with `method: "get_diff"` |
 | Get PR comments | `mcp__github__pull_request_read` with `method: "get_comments"` |
 | Get review comments | `mcp__github__pull_request_read` with `method: "get_review_comments"` |
+| Get PR checks/status | `mcp__github__pull_request_read` with `method: "get_status"` |
 | Add PR comment | `mcp__github__add_issue_comment` (PRs are issues) |
 | Create review | `mcp__github__pull_request_review_write` with `method: "create"` |
 | Update PR | `mcp__github__update_pull_request` |
+
+## Reporting PR Checks
+
+When asked about PR checks or status, use `pull_request_read` with `method: "get_status"` and display results in a table:
+
+```markdown
+| Check | Status | Details |
+|-------|--------|---------|
+| Validate PR Title | :white_check_mark: Passed | - |
+| Build | :white_check_mark: Passed | - |
+| Lint | :x: Failed | `src/auth.py:42` - Line too long |
+| Tests | :hourglass: Pending | Running... |
+```
+
+Status icons:
+- `:white_check_mark:` - Passed/Success
+- `:x:` - Failed
+- `:hourglass:` - Pending/In Progress
+- `:warning:` - Skipped or neutral
 
 ## Responding to PR Comments
 
