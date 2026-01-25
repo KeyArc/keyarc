@@ -1,0 +1,21 @@
+/* Layout component styles */
+
+/* Active navigation link styling */
+.active-link {
+  background-color: rgba(var(--mat-sys-primary-rgb), 0.1);
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
+}
+
+/* Sidenav content styling */
+mat-sidenav {
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+/* Ensure sidenav container fills available space */
+mat-sidenav-container {
+  background-color: var(--background);
+}

@@ -1,0 +1,96 @@
+/* Angular Material theming - @use must be first */
+@use '@angular/material' as mat;
+
+/* TailwindCSS v4 imports */
+@import "tailwindcss";
+
+/* TailwindCSS v4 theme configuration */
+@theme {
+  /* Primary - Blues (KeyArc brand) */
+  --color-primary-50: #e3f2fd;
+  --color-primary-100: #bbdefb;
+  --color-primary-200: #90caf9;
+  --color-primary-300: #64b5f6;
+  --color-primary-400: #42a5f5;
+  --color-primary-500: #2196f3;
+  --color-primary-600: #1e88e5;
+  --color-primary-700: #1976d2;
+  --color-primary-800: #1565c0;
+  --color-primary-900: #0d47a1;
+
+  /* Neutral - Grays */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #eeeeee;
+  --color-gray-300: #e0e0e0;
+  --color-gray-400: #bdbdbd;
+  --color-gray-500: #9e9e9e;
+  --color-gray-600: #757575;
+  --color-gray-700: #616161;
+  --color-gray-800: #424242;
+  --color-gray-900: #212121;
+}
+
+/* CSS Custom Properties for theming (shared between Material and Tailwind) */
+:root {
+  /* Semantic colors - Light mode */
+  --background: var(--color-gray-50);
+  --surface: #ffffff;
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --border: var(--color-gray-300);
+}
+
+/* Dark mode via data attribute */
+[data-theme="dark"] {
+  --background: var(--color-gray-900);
+  --surface: var(--color-gray-800);
+  --text-primary: var(--color-gray-50);
+  --text-secondary: var(--color-gray-400);
+  --border: var(--color-gray-700);
+}
+
+/* Respect system preference when no explicit theme is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: var(--color-gray-900);
+    --surface: var(--color-gray-800);
+    --text-primary: var(--color-gray-50);
+    --text-secondary: var(--color-gray-400);
+    --border: var(--color-gray-700);
+  }
+}
+
+/* Angular Material theme configuration */
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  /* Support both light and dark color schemes */
+  color-scheme: light dark;
+
+  /* Use CSS custom properties for theming */
+  background-color: var(--background);
+  color: var(--text-primary);
+  font: var(--mat-sys-body-medium);
+
+  /* Reset margin */
+  margin: 0;
+}
+
+/* Ensure full height for app shell */
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

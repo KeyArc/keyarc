@@ -1,0 +1,44 @@
+<!-- Main layout container - uses Tailwind for full height -->
+<div class="flex flex-col h-full">
+  <!-- Header toolbar - Material component with Tailwind spacing -->
+  <mat-toolbar color="primary" class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <span class="text-xl font-semibold">KeyArc</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- Theme toggle button -->
+      <button
+        mat-icon-button
+        (click)="toggleTheme()"
+        [attr.aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+      >
+        <mat-icon>{{ themeIcon() }}</mat-icon>
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <!-- Main content area with sidenav -->
+  <mat-sidenav-container class="flex-1">
+    <!-- Sidenav - Material component -->
+    <mat-sidenav mode="side" opened class="w-64">
+      <mat-nav-list>
+        @for (item of navItems(); track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="active-link"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <!-- Main content - Tailwind for padding -->
+    <mat-sidenav-content class="p-6">
+      <router-outlet />
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

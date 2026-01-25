@@ -1,0 +1,16 @@
+/* Dashboard component styles */
+
+/* Custom text color using CSS custom properties */
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Surface background using CSS custom properties */
+.bg-surface {
+  background-color: var(--surface);
+}
+
+/* Border color using CSS custom properties */
+.border-gray-200 {
+  border-color: var(--border);
+}
