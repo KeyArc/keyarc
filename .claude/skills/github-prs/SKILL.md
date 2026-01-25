@@ -1,9 +1,9 @@
 ---
-name: agent-pr-workflow
+name: github-prs
 description: Use when responding to PR comments, updating PRs, or handling PR feedback as an AI agent. Ensures proper identification and use of MCP tools.
 ---
 
-# Agent PR Workflow
+# GitHub PRs
 
 ## Overview
 
