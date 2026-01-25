@@ -31,8 +31,19 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent {
-  /** Current theme mode */
-  protected readonly isDarkMode = signal(false);
+  /** Current theme mode - initialized from system preference */
+  protected readonly isDarkMode = signal(this.detectInitialTheme());
+
+  /** Detect initial theme from system preference or existing attribute */
+  private detectInitialTheme(): boolean {
+    // Check if theme was already set
+    const existingTheme = document.documentElement.getAttribute('data-theme');
+    if (existingTheme) {
+      return existingTheme === 'dark';
+    }
+    // Fall back to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
 
   /** Theme icon based on current mode */
   protected readonly themeIcon = computed(() =>
