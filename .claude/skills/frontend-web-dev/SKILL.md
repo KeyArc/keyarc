@@ -3,7 +3,7 @@ name: frontend-web-dev
 description: Use when building Angular applications, creating TypeScript components, implementing reactive forms, managing state, working with RxJS observables, or developing modern web UI with TypeScript.
 ---
 
-# Frontend Web Development Expert (Angular 20+)
+# Frontend Web Development Expert
 
 ## Overview
 

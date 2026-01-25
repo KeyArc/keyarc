@@ -6,6 +6,9 @@ import { HttpInterceptorFn } from '@angular/common/http';
  * This is a functional interceptor (Angular 17+ pattern) that will be expanded
  * to add JWT tokens from the auth service once authentication is implemented.
  *
+ * Note: The API Gateway validates JWT tokens, but the frontend still needs
+ * to include them in request headers. This interceptor handles that.
+ *
  * Current implementation: Pass-through stub
  * Future implementation: Add Authorization header with JWT token
  */

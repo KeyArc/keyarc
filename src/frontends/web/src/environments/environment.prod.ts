@@ -5,6 +5,6 @@
 export const environment = {
   production: true,
   envName: 'production',
-  apiUrl: 'https://api.keyarc.io',
-  authUrl: 'https://auth.keyarc.io'
+  apiUrl: 'https://keyarc.io/api',
+  authUrl: 'https://keyarc.io/auth'
 };
