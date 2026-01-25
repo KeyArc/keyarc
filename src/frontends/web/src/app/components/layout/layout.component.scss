@@ -1,47 +1,66 @@
 /* Layout component styles */
 
-/* Header brand section - override Material toolbar constraints */
+/* Main app layout - fills viewport */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header */
+.app-header {
+  flex-shrink: 0;
+  padding: 0 1.5rem;
+}
+
+/* Toolbar spacer */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Header brand */
 .header-brand {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
+  display: flex;
   align-items: center;
   gap: 1rem;
-  width: auto !important;
-  min-width: fit-content !important;
-}
 
-.header-brand img {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-}
+  img {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
 
-.header-brand span {
-  white-space: nowrap;
-  width: auto !important;
-  min-width: fit-content !important;
-}
-
-/* Active navigation link styling */
-.active-link {
-  background-color: rgba(var(--mat-sys-primary-rgb), 0.1);
-
-  mat-icon {
-    color: var(--mat-sys-primary);
+  span {
+    font-size: 1.25rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
 }
 
-/* Sidenav content styling */
-mat-sidenav {
-  background-color: var(--surface);
-  border-right: 1px solid var(--border);
+/* Middle section: sidebar + content */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
-/* Nav list items - use theme colors */
+/* Sidebar */
+.app-sidebar {
+  width: 18rem;
+  flex-shrink: 0;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1rem 0;
+}
+
+/* Nav list items */
 mat-nav-list {
   a[mat-list-item] {
     color: var(--text-primary) !important;
+    margin: 0.25rem 0.75rem;
 
     .mat-mdc-list-item-title,
     .mdc-list-item__primary-text,
@@ -59,13 +78,28 @@ mat-nav-list {
   }
 }
 
-/* Ensure sidenav container fills available space */
-mat-sidenav-container {
-  background-color: var(--background);
+/* Active navigation link */
+.active-link {
+  background-color: rgba(var(--mat-sys-primary-rgb), 0.1);
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
 }
 
-/* Main content area */
-mat-sidenav-content {
+/* Main content (scrollable) */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
   background-color: var(--background);
   color: var(--text-primary);
+  padding: 2rem;
+}
+
+/* Footer */
+.app-footer {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  min-height: 32px !important;
+  height: 32px;
 }

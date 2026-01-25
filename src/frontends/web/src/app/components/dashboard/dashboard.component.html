@@ -1,44 +1,45 @@
-<!-- Dashboard placeholder - demonstrates Material + Tailwind working together -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-  <mat-card class="p-2">
-    <mat-card-header class="mb-4">
-      <mat-icon mat-card-avatar class="text-primary-500">key</mat-icon>
-      <mat-card-title>Secrets</mat-card-title>
-      <mat-card-subtitle>Manage your API keys</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p class="text-secondary">0 secrets stored</p>
-    </mat-card-content>
-  </mat-card>
+<!-- Dashboard content with consistent spacing -->
+<div class="dashboard-content">
+  <div class="card-grid">
+    <mat-card>
+      <mat-card-header>
+        <mat-icon mat-card-avatar>key</mat-icon>
+        <mat-card-title>Secrets</mat-card-title>
+        <mat-card-subtitle>Manage your API keys</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="text-secondary">0 secrets stored</p>
+      </mat-card-content>
+    </mat-card>
 
-  <mat-card class="p-2">
-    <mat-card-header class="mb-4">
-      <mat-icon mat-card-avatar class="text-primary-500">group</mat-icon>
-      <mat-card-title>Teams</mat-card-title>
-      <mat-card-subtitle>Collaborate with your team</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p class="text-secondary">0 teams</p>
-    </mat-card-content>
-  </mat-card>
+    <mat-card>
+      <mat-card-header>
+        <mat-icon mat-card-avatar>group</mat-icon>
+        <mat-card-title>Teams</mat-card-title>
+        <mat-card-subtitle>Collaborate with your team</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="text-secondary">0 teams</p>
+      </mat-card-content>
+    </mat-card>
 
-  <mat-card class="p-2">
-    <mat-card-header class="mb-4">
-      <mat-icon mat-card-avatar class="text-primary-500">schedule</mat-icon>
-      <mat-card-title>Expiring Soon</mat-card-title>
-      <mat-card-subtitle>Keys expiring in 30 days</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p class="text-secondary">0 expiring</p>
-    </mat-card-content>
-  </mat-card>
-</div>
+    <mat-card>
+      <mat-card-header>
+        <mat-icon mat-card-avatar>schedule</mat-icon>
+        <mat-card-title>Expiring Soon</mat-card-title>
+        <mat-card-subtitle>Keys expiring in 30 days</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="text-secondary">0 expiring</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
-<!-- Welcome message -->
-<div class="mt-10 p-8 bg-surface rounded-xl border border-gray-200">
-  <h2 class="text-2xl font-semibold mb-4">Welcome to KeyArc</h2>
-  <p class="text-secondary text-lg leading-relaxed">
-    Secure, zero-knowledge API key and certificate management.
-    Your secrets are encrypted client-side and never visible to our servers.
-  </p>
+  <div class="welcome-message">
+    <h2>Welcome to KeyArc</h2>
+    <p>
+      Secure, zero-knowledge API key and certificate management.
+      Your secrets are encrypted client-side and never visible to our servers.
+    </p>
+  </div>
 </div>
