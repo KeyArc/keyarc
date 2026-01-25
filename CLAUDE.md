@@ -18,25 +18,25 @@ Store API keys and certificates securely, get reminders before they expire, veri
 
 ## Technical Stack
 
-**Backend:**
+**Backend:** *(see `python-fastapi-expert` skill)*
 - FastAPI (Python async web framework)
 - PostgreSQL (relational database)
 - SQLAlchemy ORM (database access)
 
-**Frontend:**
+**Frontend:** *(see `frontend-web-dev` skill)*
 - Angular (TypeScript framework)
 - RxJS (reactive programming)
 - Angular Material (complex components: forms, tables, dialogs)
 - TailwindCSS (layout, spacing, custom styling)
 - CSS custom properties (shared theming between Material and Tailwind)
 
-**Infrastructure:**
+**Infrastructure:** *(see `devops-engineer` skill)*
 - Docker (containerization)
 - Fly.io (hosting platform)
 - Fly.io Secrets (application secrets management)
 - GitHub Actions (CI/CD)
 
-**Security:**
+**Security:** *(see `keyarc-zero-knowledge` and `keyarc-crypto-flows` skills)*
 - WebCrypto API (client-side encryption)
 - Argon2 (password-based key derivation)
 - AES (symmetric encryption)
@@ -490,11 +490,20 @@ Expected: Security review checklist for crypto code, general review for other co
 - Deployment documentation: `/docs/DEPLOYMENT.md`
 
 **Skills Documentation:**
-- Zero-knowledge architecture: `.claude/skills/keyarc-zero-knowledge/SKILL.md`
-- Cryptographic flows: `.claude/skills/keyarc-crypto-flows/SKILL.md`
-- API security: `.claude/skills/keyarc-api-security/SKILL.md`
-- GitHub issues: `.claude/skills/github-issues/SKILL.md`
-- GitHub PRs: `.claude/skills/github-prs/SKILL.md`
+Invoke skills with the Skill tool (`/skill-name`). Full documentation in `.claude/skills/<name>/SKILL.md`:
+
+| Skill | Purpose |
+|-------|---------|
+| `keyarc-zero-knowledge` | Zero-knowledge architecture, client-side encryption patterns |
+| `keyarc-crypto-flows` | Cryptographic flow implementations (signup, login, sharing) |
+| `keyarc-api-security` | API endpoint security, JWT, audit logging, OWASP patterns |
+| `github-issues` | GitHub issue conventions, project board management |
+| `github-prs` | PR feedback handling, AI agent identification |
+| `frontend-web-dev` | Angular/TypeScript patterns, Signals, RxJS, Material+Tailwind |
+| `python-fastapi-expert` | FastAPI/SQLAlchemy patterns, Pydantic, async Python |
+| `devops-engineer` | Docker/CI/CD patterns, GitHub Actions, deployment config |
+| `planning-research` | Research and planning workflow for complex features |
+| `tdd-workflow` | Test-driven development with RED-GREEN-REFACTOR cycle |
 
 **Future Documentation:**
 [PLACEHOLDER] API documentation (OpenAPI/Swagger) will be generated
@@ -527,12 +536,47 @@ Expected: Security review checklist for crypto code, general review for other co
 
 ## Development Workflow
 
-1. **Plan first** - Use planning skill for complex features
-2. **TDD** - Write tests before implementation
-3. **Security review** - All crypto code requires review
-4. **Audit logging** - Every secret access must be logged
-5. **Zero-knowledge enforcement** - Use KeyArc security skills
+1. **Plan first** - Invoke `planning-research` skill for features affecting 3+ files or requiring architectural decisions
+2. **TDD** - Invoke `tdd-workflow` skill for all feature implementation and bug fixes
+3. **Security review** - All crypto code requires review; invoke `keyarc-zero-knowledge` or `keyarc-crypto-flows` for any secrets/encryption code
+4. **Audit logging** - Every secret access must be logged; invoke `keyarc-api-security` for API endpoint patterns
+5. **Zero-knowledge enforcement** - Invoke `keyarc-zero-knowledge` for client-side encryption patterns and `keyarc-crypto-flows` for signup/login/sharing flows
 6. **Update project board** - When starting work on GitHub issues, update status on the project board
+
+## Available Skills
+
+Use the Skill tool to invoke these skills for specialized guidance. **Agents should proactively check available skills before starting work.**
+
+**Technology Skills:**
+- `frontend-web-dev` - Angular components, TypeScript, Signals, RxJS, reactive forms, Material + Tailwind styling
+- `python-fastapi-expert` - FastAPI endpoints, Pydantic models, SQLAlchemy ORM, async patterns
+- `devops-engineer` - Dockerfiles, docker-compose, GitHub Actions, CI/CD pipelines
+
+**KeyArc Security Skills (REQUIRED for all crypto/secrets work):**
+- `keyarc-zero-knowledge` - Client-side encryption, master key derivation, vault key management, secret storage
+- `keyarc-crypto-flows` - Signup/login flows, Argon2 key derivation, AES encryption, RSA/ECC team sharing
+- `keyarc-api-security` - JWT authentication, encrypted payloads, audit logging, OWASP security patterns
+
+**Workflow Skills:**
+- `planning-research` - Complex features, architecture decisions, multi-file changes requiring research
+- `tdd-workflow` - Feature implementation, bug fixes with RED-GREEN-REFACTOR test-first development
+
+**GitHub Skills:**
+- `github-issues` - Creating/managing GitHub issues, labels, milestones, project board updates
+- `github-prs` - Responding to PR comments, handling review feedback, AI agent identification
+
+### When to Use Skills Proactively
+
+| Task Type | Skill to Invoke First |
+|-----------|----------------------|
+| Any frontend Angular code | `frontend-web-dev` |
+| Any backend FastAPI code | `python-fastapi-expert` |
+| Any crypto/encryption/secrets code | `keyarc-zero-knowledge` or `keyarc-crypto-flows` |
+| Docker, CI/CD, or deployment config | `devops-engineer` |
+| Complex features (3+ files affected) | `planning-research` |
+| Implementing new features or fixes | `tdd-workflow` |
+| Creating GitHub issues | `github-issues` |
+| Responding to PR feedback | `github-prs` |
 
 ### Creating New Issues
 
