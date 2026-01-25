@@ -14,3 +14,21 @@
 .border-gray-200 {
   border-color: var(--border);
 }
+
+/* Material cards - use theme colors */
+mat-card {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+
+  mat-card-title {
+    color: var(--text-primary) !important;
+  }
+
+  mat-card-subtitle {
+    color: var(--text-secondary) !important;
+  }
+
+  mat-card-content {
+    color: var(--text-primary) !important;
+  }
+}

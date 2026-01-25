@@ -1,11 +1,10 @@
 /* Angular Material theming - @use must be first */
 @use '@angular/material' as mat;
 
-/* TailwindCSS v4 imports */
-@import "tailwindcss";
+/* TailwindCSS is imported via angular.json to avoid Sass deprecation warning */
 
-/* TailwindCSS v4 theme configuration */
-@theme {
+/* CSS Custom Properties for theming (shared between Material and Tailwind) */
+:root {
   /* Primary - Blues (KeyArc brand) */
   --color-primary-50: #e3f2fd;
   --color-primary-100: #bbdefb;
@@ -29,15 +28,12 @@
   --color-gray-700: #616161;
   --color-gray-800: #424242;
   --color-gray-900: #212121;
-}
 
-/* CSS Custom Properties for theming (shared between Material and Tailwind) */
-:root {
-  /* Semantic colors - Light mode */
+  /* Semantic colors - Light mode defaults */
   --background: var(--color-gray-50);
   --surface: #ffffff;
   --text-primary: var(--color-gray-900);
-  --text-secondary: var(--color-gray-600);
+  --text-secondary: var(--color-gray-700);
   --border: var(--color-gray-300);
 }
 

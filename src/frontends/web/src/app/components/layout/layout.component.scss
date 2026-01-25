@@ -1,5 +1,28 @@
 /* Layout component styles */
 
+/* Header brand section - override Material toolbar constraints */
+.header-brand {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 1rem;
+  width: auto !important;
+  min-width: fit-content !important;
+}
+
+.header-brand img {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.header-brand span {
+  white-space: nowrap;
+  width: auto !important;
+  min-width: fit-content !important;
+}
+
 /* Active navigation link styling */
 .active-link {
   background-color: rgba(var(--mat-sys-primary-rgb), 0.1);
@@ -15,7 +38,34 @@ mat-sidenav {
   border-right: 1px solid var(--border);
 }
 
+/* Nav list items - use theme colors */
+mat-nav-list {
+  a[mat-list-item] {
+    color: var(--text-primary) !important;
+
+    .mat-mdc-list-item-title,
+    .mdc-list-item__primary-text,
+    span[matListItemTitle] {
+      color: var(--text-primary) !important;
+    }
+
+    mat-icon {
+      color: var(--text-secondary) !important;
+    }
+
+    &:hover {
+      background-color: var(--border);
+    }
+  }
+}
+
 /* Ensure sidenav container fills available space */
 mat-sidenav-container {
   background-color: var(--background);
+}
+
+/* Main content area */
+mat-sidenav-content {
+  background-color: var(--background);
+  color: var(--text-primary);
 }
