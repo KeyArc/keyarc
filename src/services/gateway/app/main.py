@@ -6,8 +6,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from services.gateway.app.config import settings
-from services.gateway.app.logging import get_logger, setup_logging
 from services.gateway.app.routers import health
+from shared.logging import get_logger, setup_logging
 
 
 @asynccontextmanager

@@ -7,8 +7,8 @@ from fastapi import FastAPI
 
 from services.keys.app.config import settings
 from services.keys.app.database import engine
-from services.keys.app.logging import get_logger, setup_logging
 from services.keys.app.routers import health
+from shared.logging import get_logger, setup_logging
 
 
 @asynccontextmanager
