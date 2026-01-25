@@ -51,8 +51,8 @@ KeyArc follows a right-sized services approach—pragmatic microservices with cl
 | Service | Visibility | URL | Responsibility |
 |---------|------------|-----|----------------|
 | **Frontend** | Public | keyarc.io | Angular SPA, static files |
-| **Auth Service** | Public | auth.keyarc.io | Signup, login, password reset, token refresh |
-| **Gateway** | Public | api.keyarc.io | JWT validation, routing to private services |
+| **Auth Service** | Public | keyarc.io/auth | Signup, login, password reset, token refresh |
+| **Gateway** | Public | keyarc.io/api | JWT validation, routing to private services |
 | **Account Service** | Private | account.flycast | User profiles, teams, memberships, invitations |
 | **Key Service** | Private | keys.flycast | Encrypted secrets, folders, tags, sharing |
 
@@ -68,7 +68,7 @@ KeyArc follows a right-sized services approach—pragmatic microservices with cl
 │  │   ┌──────────────┐   ┌──────────────┐    ┌────────────┐     │   │
 │  │   │   Frontend   │   │ Auth Service │    │  Gateway   │     │   │
 │  │   │  (Angular)   │   │  (FastAPI)   │    │ (FastAPI)  │     │   │
-│  │   │ keyarc.io    │   │auth.keyarc.io│    │api.keyarc.io     │   │
+│  │   │ keyarc.io    │   │keyarc.io/auth│    │keyarc.io/api     │   │
 │  │   └──────────────┘   └──────────────┘    └─────┬──────┘     │   │
 │  │                             │                  │            │   │
 │  └─────────────────────────────│──────────────────│────────────┘   │
@@ -355,14 +355,14 @@ keyarc/
 
 ### Service Endpoints
 
-**Auth Service (auth.keyarc.io)** - Public, unauthenticated:
+**Auth Service (keyarc.io/auth)** - Public, unauthenticated:
 - `POST /signup` - Create account
 - `POST /login` - Authenticate, receive JWT
 - `POST /password-reset` - Request password reset
 - `POST /password-reset/confirm` - Confirm password reset
 - `POST /token/refresh` - Refresh JWT token
 
-**Gateway (api.keyarc.io)** - Public, requires JWT:
+**Gateway (keyarc.io/api)** - Public, requires JWT:
 - `GET/POST/PUT/DELETE /account/*` → Routes to Account Service
 - `GET/POST/PUT/DELETE /keys/*` → Routes to Key Service
 

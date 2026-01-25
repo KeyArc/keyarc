@@ -14,7 +14,7 @@ KeyArc uses a right-sized services approach—pragmatic microservices with clear
 │  │   ┌──────────────┐   ┌──────────────┐    ┌────────────┐     │   │
 │  │   │   Frontend   │   │ Auth Service │    │  Gateway   │     │   │
 │  │   │  (Angular)   │   │  (FastAPI)   │    │ (FastAPI)  │     │   │
-│  │   │ keyarc.io    │   │auth.keyarc.io│    │api.keyarc.io     │   │
+│  │   │ keyarc.io    │   │keyarc.io/auth│    │keyarc.io/api     │   │
 │  │   └──────────────┘   └──────────────┘    └─────┬──────┘     │   │
 │  │                             │                  │            │   │
 │  └─────────────────────────────│──────────────────│────────────┘   │
@@ -45,8 +45,8 @@ KeyArc uses a right-sized services approach—pragmatic microservices with clear
 | Service | Visibility | URL | Purpose |
 |---------|------------|-----|---------|
 | **Frontend** | Public | keyarc.io | Angular SPA |
-| **Auth Service** | Public | auth.keyarc.io | Signup, login, password reset, tokens |
-| **Gateway** | Public | api.keyarc.io | JWT validation, routing |
+| **Auth Service** | Public | keyarc.io/auth | Signup, login, password reset, tokens |
+| **Gateway** | Public | keyarc.io/api | JWT validation, routing |
 | **Account Service** | Private | account.flycast | User profiles, teams, memberships |
 | **Key Service** | Private | keys.flycast | Encrypted secrets, folders, tags |
 

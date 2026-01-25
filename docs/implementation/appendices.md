@@ -127,7 +127,7 @@ Team Key (random AES-256)
 
 ## Appendix C: Service Endpoint Summary
 
-### Auth Service (auth.keyarc.io) - Public
+### Auth Service (keyarc.io/auth) - Public
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -136,7 +136,7 @@ Team Key (random AES-256)
 | POST | /token/refresh | Refresh JWT token |
 | GET | /health | Health check |
 
-### Gateway (api.keyarc.io) - Public
+### Gateway (keyarc.io/api) - Public
 
 | Method | Endpoint | Routes To |
 |--------|----------|-----------|

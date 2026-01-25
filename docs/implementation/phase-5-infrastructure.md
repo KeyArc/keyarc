@@ -103,8 +103,8 @@ Provision Fly.io resources.
   - `JWT_SECRET` for Auth and Gateway
 - Domain configuration:
   - keyarc.io → frontend
-  - auth.keyarc.io → Auth Service
-  - api.keyarc.io → Gateway
+  - keyarc.io/auth → Auth Service
+  - keyarc.io/api → Gateway
 
 **Acceptance Criteria**:
 - [ ] All Fly apps created
