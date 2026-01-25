@@ -494,6 +494,7 @@ Expected: Security review checklist for crypto code, general review for other co
 - Cryptographic flows: `.claude/skills/keyarc-crypto-flows/SKILL.md`
 - API security: `.claude/skills/keyarc-api-security/SKILL.md`
 - GitHub issues: `.claude/skills/github-issues/SKILL.md`
+- Agent PR workflow: `.claude/skills/agent-pr-workflow/SKILL.md`
 
 **Future Documentation:**
 [PLACEHOLDER] API documentation (OpenAPI/Swagger) will be generated
@@ -539,6 +540,13 @@ When creating new GitHub issues, follow the complete workflow in `.claude/skills
 1. Create issue with milestone and labels via `gh issue create`
 2. Add to project board via `gh project item-add`
 3. Set project fields (status, phase, track) via GraphQL mutations
+
+### Handling PR Feedback (Agents)
+
+When responding to PR comments or review feedback, follow `.claude/skills/agent-pr-workflow/SKILL.md`:
+- Always identify yourself as an AI agent in PR comments
+- Use MCP GitHub tools (`mcp__github__*`) for PR operations when available
+- Acknowledge all feedback with a response
 
 ### GitHub Project Board Updates
 
