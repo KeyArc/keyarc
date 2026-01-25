@@ -137,12 +137,12 @@ ruff format --check services shared
 mypy services shared --ignore-missing-imports
 
 # Auto-fix formatting
-ruff format services shared
+ruff format src/services src/shared
 ```
 
-**TypeScript (from frontend/ directory):**
+**TypeScript (from src/frontends/web/ directory):**
 ```bash
-cd frontend
+cd src/frontends/web
 npm run lint
 npx tsc --noEmit --skipLibCheck
 ```

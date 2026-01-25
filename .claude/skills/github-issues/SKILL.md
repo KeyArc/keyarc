@@ -458,7 +458,7 @@ architecture decisions.
 
 ## Technical Notes
 - Use asyncpg driver for async support
-- Follow existing SQLAlchemy patterns from shared/models/
+- Follow existing SQLAlchemy patterns from src/shared/models/
 - Database URL from FLY_PG_PROXY_CONN_STRING
 
 ## Related Issues
