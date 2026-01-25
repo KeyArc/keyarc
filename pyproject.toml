@@ -37,7 +37,7 @@ ignore = [
 force-single-line = false
 lines-after-imports = 2
 lines-between-types = 1
-known-first-party = ["shared"]
+known-first-party = ["shared", "services"]
 
 [tool.ruff.lint.pylint]
 max-branches = 12
