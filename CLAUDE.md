@@ -297,50 +297,50 @@ KeyArc implements a Bitwarden-inspired zero-knowledge encryption model where:
 
 ```
 keyarc/
-├── frontend/                 # Angular SPA
-│   └── src/app/
-│       ├── components/
-│       ├── services/
-│       ├── models/
-│       └── guards/
-├── services/
-│   ├── auth/                 # Auth Service (FastAPI)
-│   │   ├── app/
-│   │   │   ├── routers/
-│   │   │   ├── schemas/
-│   │   │   └── main.py
-│   │   └── tests/
-│   ├── gateway/              # Gateway Service (FastAPI/Starlette)
-│   │   ├── app/
-│   │   │   ├── routing.py
-│   │   │   └── main.py
-│   │   └── tests/
-│   ├── account/              # Account Service (FastAPI)
-│   │   ├── app/
-│   │   │   ├── routers/
-│   │   │   ├── schemas/
-│   │   │   └── main.py
-│   │   └── tests/
-│   └── keys/                 # Key Service (FastAPI)
-│       ├── app/
-│       │   ├── routers/
-│       │   ├── schemas/
-│       │   └── main.py
-│       └── tests/
-├── shared/                   # Shared modules
-│   ├── models/               # SQLAlchemy models
-│   ├── audit/                # Audit logging module
-│   ├── rbac/                 # RBAC module
-│   └── schemas/              # Shared Pydantic schemas
-├── migrations/               # Alembic migrations
+├── src/
+│   ├── services/
+│   │   ├── auth/                 # Auth Service (FastAPI)
+│   │   │   ├── app/
+│   │   │   │   ├── routers/
+│   │   │   │   ├── schemas/
+│   │   │   │   └── main.py
+│   │   │   └── tests/
+│   │   ├── gateway/              # Gateway Service (FastAPI/Starlette)
+│   │   │   ├── app/
+│   │   │   │   ├── routing.py
+│   │   │   │   └── main.py
+│   │   │   └── tests/
+│   │   ├── account/              # Account Service (FastAPI)
+│   │   │   ├── app/
+│   │   │   │   ├── routers/
+│   │   │   │   ├── schemas/
+│   │   │   │   └── main.py
+│   │   │   └── tests/
+│   │   └── keys/                 # Key Service (FastAPI)
+│   │       ├── app/
+│   │       │   ├── routers/
+│   │       │   ├── schemas/
+│   │       │   └── main.py
+│   │       └── tests/
+│   ├── frontends/
+│   │   └── web/                  # Main Angular SPA
+│   │       └── src/app/
+│   │           ├── components/
+│   │           ├── services/
+│   │           ├── models/
+│   │           └── guards/
+│   └── shared/                   # Shared Python modules
+│       ├── models/               # SQLAlchemy models
+│       ├── audit/                # Audit logging module
+│       ├── rbac/                 # RBAC module
+│       └── schemas/              # Shared Pydantic schemas
+├── migrations/                   # Alembic migrations
 └── docs/
 ```
 
-[PLACEHOLDER] Exact structure will be refined during implementation.
-
 ### Shared Components
 
-- **shared/models/**: SQLAlchemy models shared across services
+- **src/shared/models/**: SQLAlchemy models shared across services
 - **shared/audit/**: Audit logging functions used by all services
 - **shared/rbac/**: Role-based access control checks
 - **shared/schemas/**: Common Pydantic schemas
