@@ -1,0 +1,1 @@
+"""Gateway service Pydantic schemas."""
