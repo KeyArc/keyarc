@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     Sets up logging on startup and disposes of the database engine on shutdown.
     """
-    setup_logging()
+    setup_logging(log_level=settings.log_level, log_json=settings.log_json)
     logger = get_logger(__name__)
     logger.info("Starting Auth service", app_name=settings.app_name)
     yield

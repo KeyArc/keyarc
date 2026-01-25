@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     keys_service_url: str = "http://localhost:8004"
 
     # Logging settings
-    log_level: str = "INFO"
+    log_level: str = "DEBUG"
     log_json: bool = True
 
 

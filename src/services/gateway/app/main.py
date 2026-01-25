@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     Sets up logging on startup.
     """
-    setup_logging()
+    setup_logging(log_level=settings.log_level, log_json=settings.log_json)
     logger = get_logger(__name__)
     logger.info("Starting Gateway service", app_name=settings.app_name)
     yield

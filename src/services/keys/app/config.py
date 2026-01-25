@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/keyarc"
 
     # Logging settings
-    log_level: str = "INFO"
+    log_level: str = "DEBUG"
     log_json: bool = True
 
 
