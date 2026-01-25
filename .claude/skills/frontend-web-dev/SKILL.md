@@ -3,67 +3,93 @@ name: frontend-web-dev
 description: Use when building Angular applications, creating TypeScript components, implementing reactive forms, managing state, working with RxJS observables, or developing modern web UI with TypeScript.
 ---
 
-# Frontend Web Development Expert
+# Frontend Web Development Expert (Angular 20+)
 
 ## Overview
-Expert guidance for building modern web applications with Angular, TypeScript, RxJS, and modern web APIs. Focused on component architecture, reactive programming, and type-safe development.
+
+Expert guidance for building modern web applications with Angular 20+, TypeScript, Signals, and RxJS. Focused on standalone components, signal-based reactivity, and type-safe development.
 
 ## When to Use
-- Creating Angular components, services, or modules
+
+- Creating Angular components, services, or standalone features
 - Implementing reactive forms or template-driven forms
-- Working with RxJS observables and operators
-- Managing application state
+- Working with Signals for state management
+- Working with RxJS observables for async streams
 - Implementing HTTP clients and API integration
 - Creating reusable UI components
 - Implementing routing and navigation
 - Working with Angular dependency injection
 
-## Core Patterns
+## Angular 20+ Core Patterns
 
-### Angular Component Structure
+### Standalone Component with Signals (Preferred)
+
 ```typescript
-// Good: Well-structured component with OnPush
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+// Good: Modern Angular 20 component with signals and OnPush
+import {
+  Component,
+  ChangeDetectionStrategy,
+  input,
+  output,
+  computed
+} from '@angular/core';
+
+interface User {
+  readonly id: number;
+  readonly name: string;
+  readonly email: string;
+}
 
 @Component({
   selector: 'app-user-card',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './user-card.component.html',
-  styleUrls: ['./user-card.component.scss'],
+  styleUrl: './user-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserCardComponent {
-  @Input() user!: User;
-  @Output() userSelected = new EventEmitter<User>();
+  // Signal-based inputs (Angular 17+)
+  user = input.required<User>();
+
+  // Signal-based outputs
+  userSelected = output<User>();
+
+  // Computed signals for derived state
+  displayName = computed(() => this.user().name.toUpperCase());
 
   onSelect(): void {
-    this.userSelected.emit(this.user);
+    this.userSelected.emit(this.user());
   }
 }
 ```
 
 ```typescript
-// Bad: No change detection strategy, any types
+// Bad: Outdated patterns
 @Component({
   selector: 'user-card',
   template: `<div>{{user.name}}</div>`
+  // Missing: standalone, OnPush, proper typing
 })
 export class UserCard {
   user: any;  // No type safety!
-  selected: any;
-
-  select() {
-    this.selected(this.user);  // Not using EventEmitter
-  }
+  @Output() selected: any;  // Old decorator syntax + any type
 }
 ```
 
-### Service with Dependency Injection
+### Service with Signals for State
+
 ```typescript
-// Good: Injectable service with proper typing
-import { Injectable } from '@angular/core';
+// Good: Modern service using signals for state management
+import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+
+interface User {
+  readonly id: number;
+  readonly name: string;
+  readonly email: string;
+  readonly active: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -71,169 +97,243 @@ import { map, catchError } from 'rxjs/operators';
 export class UserService {
   private readonly apiUrl = '/api/users';
 
+  // Signal-based state
+  private readonly usersState = signal<User[]>([]);
+  private readonly loadingState = signal(false);
+  private readonly errorState = signal<string | null>(null);
+
+  // Public readonly computed signals
+  readonly users = this.usersState.asReadonly();
+  readonly loading = this.loadingState.asReadonly();
+  readonly error = this.errorState.asReadonly();
+
+  // Computed derived state
+  readonly activeUsers = computed(() =>
+    this.usersState().filter(u => u.active)
+  );
+  readonly userCount = computed(() => this.usersState().length);
+
   constructor(private http: HttpClient) {}
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl).pipe(
-      map(users => users.filter(u => u.active)),
-      catchError(this.handleError)
-    );
+  loadUsers(): void {
+    this.loadingState.set(true);
+    this.errorState.set(null);
+
+    this.http.get<User[]>(this.apiUrl).subscribe({
+      next: (users) => {
+        this.usersState.set(users);
+        this.loadingState.set(false);
+      },
+      error: (err) => {
+        this.errorState.set(err.message);
+        this.loadingState.set(false);
+      }
+    });
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    // Proper error handling
-    throw new Error(`API Error: ${error.message}`);
+  addUser(user: User): void {
+    // Immutable update
+    this.usersState.update(users => [...users, user]);
   }
 }
 ```
 
-### Reactive Forms
+### Reactive Forms with Typed FormGroup
+
 ```typescript
-// Good: Type-safe reactive forms with validation
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+// Good: Strongly-typed reactive forms (Angular 14+)
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
+interface UserFormValue {
+  email: string;
+  name: string;
+  age: number | null;
+}
+
+@Component({
+  selector: 'app-user-form',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  templateUrl: './user-form.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
 export class UserFormComponent {
-  userForm: FormGroup;
+  // Typed form group
+  userForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    age: [null as number | null, [Validators.min(0), Validators.max(150)]]
+  });
 
-  constructor(private fb: FormBuilder) {
-    this.userForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      age: [null, [Validators.min(0), Validators.max(150)]]
-    });
-  }
+  constructor(private fb: FormBuilder) {}
 
   onSubmit(): void {
     if (this.userForm.valid) {
-      const userData: UserCreate = this.userForm.value;
-      // Process form data
+      const userData: UserFormValue = this.userForm.getRawValue();
+      // Process typed form data
     }
   }
 }
 ```
 
-## Quick Reference: Angular Best Practices
+## Quick Reference: Angular 20+ Best Practices
 
 | Pattern | Recommendation |
 |---------|---------------|
-| Change Detection | Use OnPush for performance |
-| State Management | Services with BehaviorSubject for simple cases |
-| HTTP Calls | Always type responses, use HttpClient |
-| Forms | Reactive forms for complex validation |
-| Component Communication | @Input/@Output for parent-child |
-| Observables | Always unsubscribe (async pipe or takeUntil) |
-| Type Safety | Strict TypeScript, no `any` types |
+| Components | Standalone with `standalone: true` |
+| Change Detection | Always use `OnPush` for performance |
+| State (local) | Signals: `signal()`, `computed()` |
+| State (shared) | Services with signals |
+| Async streams | RxJS for HTTP, events, WebSockets |
+| Inputs | `input()` / `input.required()` (signal-based) |
+| Outputs | `output()` (signal-based) |
+| Forms | Typed reactive forms with `fb.nonNullable.group()` |
+| Type Safety | Strict TypeScript, interfaces for all data |
+
+## Change Detection: OnPush Explained
+
+Angular checks components for changes to update the DOM. There are two strategies:
+
+**Default:** Check this component on EVERY change detection cycle (expensive)
+
+**OnPush:** Only check this component when:
+1. An `@Input()` or `input()` reference changes
+2. An event originates from this component or its children
+3. A signal used in the template updates
+4. Manually triggered via `ChangeDetectorRef`
+
+```typescript
+// ALWAYS use OnPush - it's a free performance win
+@Component({
+  // ...
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+```
+
+**With signals, OnPush becomes even more efficient** - Angular knows exactly which signal changed and only updates the affected DOM nodes.
+
+## Signals vs RxJS: When to Use Each
+
+| Use Case | Use Signals | Use RxJS |
+|----------|-------------|----------|
+| Component state | ✅ `signal()` | ❌ |
+| Derived/computed values | ✅ `computed()` | ❌ |
+| Service state | ✅ `signal()` | ⚠️ BehaviorSubject (legacy) |
+| HTTP requests | ❌ | ✅ `HttpClient` returns Observable |
+| Event streams | ❌ | ✅ Multiple values over time |
+| Debounce/throttle | ❌ | ✅ RxJS operators |
+| Combining async sources | ⚠️ Limited | ✅ `combineLatest`, `forkJoin` |
+
+```typescript
+// Signals: Synchronous state
+const count = signal(0);
+const doubled = computed(() => count() * 2);
+
+// RxJS: Async streams (HTTP, events, WebSockets)
+this.http.get<User[]>('/api/users').pipe(
+  catchError(err => of([]))
+).subscribe(users => this.usersState.set(users));
+```
 
 ## Common Mistakes
 
-**Memory leaks from subscriptions:**
+**Forgetting OnPush:**
 ```typescript
-// Bad: Subscription leak
-export class Component {
-  ngOnInit() {
-    this.service.getData().subscribe(data => {
-      this.data = data;
-    });  // Never unsubscribed!
-  }
-}
+// Bad: Missing OnPush (checks every cycle)
+@Component({ selector: 'app-foo', ... })
 
-// Good: Use async pipe (auto-unsubscribes)
-export class Component {
-  data$ = this.service.getData();
-}
-// Template: {{ data$ | async }}
-
-// Good: Manual unsubscribe
-export class Component implements OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  ngOnInit() {
-    this.service.getData()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => this.data = data);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-}
-```
-
-**Not using strict typing:**
-```typescript
-// Bad: Lose type safety
-users: any[];
-getData(): Observable<any> { }
-
-// Good: Proper types
-users: User[];
-getData(): Observable<User[]> { }
+// Good: Always include OnPush
+@Component({
+  selector: 'app-foo',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  ...
+})
 ```
 
 **Mutating state directly:**
 ```typescript
-// Bad: Direct mutation
+// Bad: Direct mutation (won't trigger change detection with OnPush)
 this.users.push(newUser);
+this.usersSignal().push(newUser);  // Also bad!
 
 // Good: Immutable update
 this.users = [...this.users, newUser];
+this.usersSignal.update(users => [...users, newUser]);
 ```
 
-## RxJS Patterns
-
+**Not typing data structures:**
 ```typescript
-// Good: Combining multiple observables
-import { combineLatest, forkJoin } from 'rxjs';
-import { switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+// Bad: Lose type safety
+const data: any = response;
+navItems = signal([{ label: 'Home', icon: 'home' }]);  // Inline, no interface
 
-// Search with debounce
-searchTerm$: Observable<string> = this.searchControl.valueChanges.pipe(
-  debounceTime(300),
-  distinctUntilChanged(),
-  switchMap(term => this.service.search(term))
-);
+// Good: Define interfaces
+interface NavItem {
+  readonly label: string;
+  readonly icon: string;
+  readonly route: string;
+}
+const navItems = signal<NavItem[]>([...]);
+```
 
-// Parallel requests
-forkJoin({
-  users: this.userService.getUsers(),
-  teams: this.teamService.getTeams()
-}).subscribe(({ users, teams }) => {
-  // Both completed
-});
+**Memory leaks with RxJS (still relevant for HTTP/events):**
+```typescript
+// Bad: Subscription leak
+ngOnInit() {
+  this.service.getData().subscribe(data => {
+    this.data = data;
+  });
+}
 
-// Reactive combinations
-combineLatest([this.filter$, this.users$]).pipe(
-  map(([filter, users]) => users.filter(u => u.name.includes(filter)))
-);
+// Good: Use takeUntilDestroyed (Angular 16+)
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+export class MyComponent {
+  private destroyRef = inject(DestroyRef);
+
+  ngOnInit() {
+    this.service.getData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => this.dataSignal.set(data));
+  }
+}
+
+// Better: Convert to signal with toSignal()
+import { toSignal } from '@angular/core/rxjs-interop';
+
+export class MyComponent {
+  data = toSignal(this.service.getData(), { initialValue: [] });
+}
 ```
 
 ## TypeScript Best Practices
 
 ```typescript
-// Good: Strict interfaces and types
+// Good: Strict interfaces with readonly properties
 interface User {
   readonly id: number;
-  email: string;
-  name: string;
-  createdAt: Date;
+  readonly email: string;
+  readonly name: string;
+  readonly createdAt: Date;
 }
 
+// Good: Utility types for variations
 type UserCreate = Omit<User, 'id' | 'createdAt'>;
 type UserUpdate = Partial<UserCreate>;
 
-// Good: Union types for state
-type LoadingState =
+// Good: Discriminated unions for state
+type LoadingState<T> =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'success'; data: User[] }
+  | { status: 'success'; data: T }
   | { status: 'error'; error: string };
 ```
 
 ## Testing Patterns
 
 ```typescript
-// Good: Component testing with TestBed
+// Good: Testing standalone component with signals
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 describe('UserCardComponent', () => {
@@ -242,7 +342,7 @@ describe('UserCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ UserCardComponent ]
+      imports: [UserCardComponent]  // Standalone: import the component itself
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserCardComponent);
@@ -251,7 +351,10 @@ describe('UserCardComponent', () => {
 
   it('should emit userSelected when clicked', () => {
     const user: User = { id: 1, name: 'Test', email: 'test@example.com' };
-    component.user = user;
+
+    // Set signal input using componentRef
+    fixture.componentRef.setInput('user', user);
+    fixture.detectChanges();
 
     let emittedUser: User | undefined;
     component.userSelected.subscribe(u => emittedUser = u);
@@ -265,10 +368,10 @@ describe('UserCardComponent', () => {
 
 ## Key Principles
 
-1. **OnPush change detection**: Better performance for components
-2. **Reactive programming**: Leverage RxJS observables effectively
-3. **Type safety**: Use strict TypeScript, avoid `any`
-4. **Immutable updates**: Never mutate state directly
-5. **Unsubscribe**: Use async pipe or takeUntil pattern
-6. **Dependency injection**: Use services for shared logic
-7. **Testing**: Write tests for components and services
+1. **Standalone components**: Always use `standalone: true`
+2. **OnPush always**: Free performance optimization
+3. **Signals for state**: Simpler than RxJS for synchronous state
+4. **RxJS for streams**: HTTP calls, events, WebSockets
+5. **Type everything**: Interfaces for all data structures
+6. **Immutable updates**: Never mutate, always create new references
+7. **Modern inputs/outputs**: Use `input()` and `output()` functions
