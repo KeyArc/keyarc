@@ -42,7 +42,7 @@ Create the FastAPI project structure for all backend services.
 **Scope**:
 - Project structure per service:
   ```
-  services/
+  src/services/
   ├── auth/
   │   ├── app/
   │   │   ├── __init__.py
@@ -79,7 +79,7 @@ Create the Angular project structure for the frontend.
 - Angular 20 project initialization
 - Project structure:
   ```
-  frontend/
+  src/frontends/web/
   └── src/app/
       ├── components/
       ├── services/

@@ -41,11 +41,11 @@ Automated deployment on push to main:
 
 | Service | Fly App | Trigger Path |
 |---------|---------|--------------|
-| Frontend | keyarc-frontend | `frontend/**` |
-| Auth Service | keyarc-auth | `services/auth/**`, `shared/**` |
-| Gateway | keyarc-gateway | `services/gateway/**` |
-| Account Service | keyarc-account | `services/account/**`, `shared/**` |
-| Key Service | keyarc-keys | `services/keys/**`, `shared/**` |
+| Frontend | keyarc-frontend | `src/frontends/web/**` |
+| Auth Service | keyarc-auth | `src/services/auth/**`, `src/shared/**` |
+| Gateway | keyarc-gateway | `src/services/gateway/**` |
+| Account Service | keyarc-account | `src/services/account/**`, `src/shared/**` |
+| Key Service | keyarc-keys | `src/services/keys/**`, `src/shared/**` |
 
 ## Database
 

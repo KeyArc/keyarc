@@ -122,7 +122,7 @@ async def get_current_user(
 ## Creating Tokens (Auth Service Only)
 
 ```python
-# services/auth/app/utils/security.py
+# src/services/auth/app/utils/security.py
 from datetime import datetime, timedelta
 from jose import jwt
 
@@ -149,7 +149,7 @@ The Gateway validates JWTs and passes user context to private services via heade
 # X-User-Email: <email>
 
 # Private services (Account, Key) read user from headers:
-# services/account/app/dependencies.py or services/keys/app/dependencies.py
+# src/services/account/app/dependencies.py or src/services/keys/app/dependencies.py
 
 from fastapi import Header, HTTPException
 

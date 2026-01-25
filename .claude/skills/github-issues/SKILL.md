@@ -259,14 +259,83 @@ This work is broken down into the following tasks:
 - Unrelated tasks (use labels/milestones instead)
 - Bugs (usually standalone)
 
-### What NOT to Use (For Now)
+### GitHub Project Board
 
-**GitHub Projects:** Skip for early development. Adds overhead without much benefit for solo/small team work. Consider adding when:
-- Team grows beyond 2-3 active contributors
-- Need cross-repo visibility
-- Want custom workflow automation
+KeyArc uses a GitHub Project board to track work status. **Every issue must be added to the project board.**
 
-**Epics via labels:** Not needed when using sub-issues. The parent issue serves as the epic.
+**Project Reference:**
+- Project ID: `PVT_kwDODzuJ-c4BNYGm`
+- Status Field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y71s`
+- Project URL: https://github.com/orgs/KeyArc/projects/1
+
+**Status Options:**
+
+| Status | Option ID | When to Use |
+|--------|-----------|-------------|
+| Ready | `e5dd8d9b` | Issue is ready to work on |
+| Blocked | `a149a0a4` | Waiting on dependencies |
+| In Progress | `b3644764` | Actively being worked on |
+| Done | `f3192413` | Completed (manual only) |
+
+### Complete Issue Creation Workflow
+
+When creating a new issue, follow these steps:
+
+**Step 1: Create the issue with milestone and labels**
+```bash
+gh issue create --repo KeyArc/keyarc \
+  --title "Issue title here" \
+  --body "Issue body..." \
+  --milestone "Phase 1: Foundation" \
+  --label "priority:high,track:dev,scope:infra"
+```
+
+**Step 2: Add to project board**
+```bash
+gh project item-add 1 --owner KeyArc --url https://github.com/KeyArc/keyarc/issues/ISSUE_NUMBER
+```
+
+**Step 3: Set project status**
+```bash
+# Get the item ID first
+ITEM_ID=$(gh project item-list 1 --owner KeyArc --format json | jq -r '.items[] | select(.content.number == ISSUE_NUMBER) | .id')
+
+# Set status to Ready
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwDODzuJ-c4BNYGm"
+    itemId: "'"$ITEM_ID"'"
+    fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y71s"
+    value: {singleSelectOptionId: "e5dd8d9b"}
+  }) { projectV2Item { id } }
+}'
+```
+
+### Quick Reference Commands
+
+**Add issue to project:**
+```bash
+gh project item-add 1 --owner KeyArc --url https://github.com/KeyArc/keyarc/issues/NUMBER
+```
+
+**Update status to In Progress:**
+```bash
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwDODzuJ-c4BNYGm"
+    itemId: "ITEM_ID"
+    fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y71s"
+    value: {singleSelectOptionId: "b3644764"}
+  }) { projectV2Item { id } }
+}'
+```
+
+**List project items with status:**
+```bash
+gh project item-list 1 --owner KeyArc --format json | jq '.items[] | {number: .content.number, title: .content.title, status: .status}'
+```
 
 ### Organizational Hierarchy
 
@@ -389,7 +458,7 @@ architecture decisions.
 
 ## Technical Notes
 - Use asyncpg driver for async support
-- Follow existing SQLAlchemy patterns from shared/models/
+- Follow existing SQLAlchemy patterns from src/shared/models/
 - Database URL from FLY_PG_PROXY_CONN_STRING
 
 ## Related Issues
