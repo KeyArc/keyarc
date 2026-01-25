@@ -533,6 +533,13 @@ Expected: Security review checklist for crypto code, general review for other co
 5. **Zero-knowledge enforcement** - Use KeyArc security skills
 6. **Update project board** - When starting work on GitHub issues, update status on the project board
 
+### Creating New Issues
+
+When creating new GitHub issues, follow the complete workflow in `.claude/skills/github-issues/SKILL.md`:
+1. Create issue with milestone and labels via `gh issue create`
+2. Add to project board via `gh project item-add`
+3. Set project fields (status, phase, track) via GraphQL mutations
+
 ### GitHub Project Board Updates
 
 When working on GitHub issues, update the project board status. **Note:** Only move issues to "In Progress" or "Ready" - never mark issues as "Done" (that's for manual review).
