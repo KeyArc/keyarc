@@ -572,11 +572,23 @@ mutation {
 - Ready: `e5dd8d9b`
 - Blocked: `a149a0a4`
 - In Progress: `b3644764`
+- In Review: `9a932cb4`
 - Done: `f3192413` (manual only - do not use programmatically)
+
+**Phase option IDs:**
+- Phase 1: Foundation: `acaef4ee`
+- Phase 2: Authentication: `205962fc`
+
+**Track option IDs:**
+- Dev: `e916e7bd`
+- DevOps: `8612f72a`
+- QA: `a28706f5`
 
 **Project reference:**
 - Project ID: `PVT_kwDODzuJ-c4BNYGm`
 - Status field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y71s`
+- Phase field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y8FI`
+- Track field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y8FM`
 - Project URL: https://github.com/orgs/KeyArc/projects/1
 
 ## Quick Start (When Codebase Exists)
