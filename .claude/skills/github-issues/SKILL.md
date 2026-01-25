@@ -337,6 +337,19 @@ mutation {
 gh project item-list 1 --owner KeyArc --format json | jq '.items[] | {number: .content.number, title: .content.title, status: .status}'
 ```
 
+### GitHub API Tips
+
+Use `gh api` - handles auth automatically:
+```bash
+gh api repos/OWNER/REPO/issues -q '.[] | {number, title}'  # GET + jq
+gh api repos/OWNER/REPO/issues/10/comments -X POST -f body="text"  # -f for strings
+gh api repos/OWNER/REPO/issues/10/dependencies/blocked_by -X POST -F issue_id=123  # -F for integers
+```
+
+For project boards, use `gh api graphql -f query='mutation {...}'`.
+
+Auto-unblock workflow: `.github/workflows/auto-unblock-issues.yml` moves issues to "Ready" when blockers close.
+
 ### Organizational Hierarchy
 
 ```
