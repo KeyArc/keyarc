@@ -266,16 +266,24 @@ KeyArc uses a GitHub Project board to track work status. **Every issue must be a
 **Project Reference:**
 - Project ID: `PVT_kwDODzuJ-c4BNYGm`
 - Status Field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y71s`
+- Phase Field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y8FI`
+- Track Field ID: `PVTSSF_lADODzuJ-c4BNYGmzg8Y8FM`
 - Project URL: https://github.com/orgs/KeyArc/projects/1
 
-**Status Options:**
+**Field Options:**
 
-| Status | Option ID | When to Use |
-|--------|-----------|-------------|
-| Ready | `e5dd8d9b` | Issue is ready to work on |
-| Blocked | `a149a0a4` | Waiting on dependencies |
-| In Progress | `b3644764` | Actively being worked on |
-| Done | `f3192413` | Completed (manual only) |
+| Field | Option | ID |
+|-------|--------|-----|
+| Status | Ready | `e5dd8d9b` |
+| Status | Blocked | `a149a0a4` |
+| Status | In Progress | `b3644764` |
+| Status | In Review | `9a932cb4` |
+| Status | Done | `f3192413` |
+| Phase | Phase 1: Foundation | `acaef4ee` |
+| Phase | Phase 2: Authentication | `205962fc` |
+| Track | Dev | `e916e7bd` |
+| Track | DevOps | `8612f72a` |
+| Track | QA | `a28706f5` |
 
 ### Complete Issue Creation Workflow
 
@@ -295,7 +303,7 @@ gh issue create --repo KeyArc/keyarc \
 gh project item-add 1 --owner KeyArc --url https://github.com/KeyArc/keyarc/issues/ISSUE_NUMBER
 ```
 
-**Step 3: Set project status**
+**Step 3: Set project fields (status, phase, track)**
 ```bash
 # Get the item ID first
 ITEM_ID=$(gh project item-list 1 --owner KeyArc --format json | jq -r '.items[] | select(.content.number == ISSUE_NUMBER) | .id')
@@ -308,6 +316,28 @@ mutation {
     itemId: "'"$ITEM_ID"'"
     fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y71s"
     value: {singleSelectOptionId: "e5dd8d9b"}
+  }) { projectV2Item { id } }
+}'
+
+# Set phase (use option ID from Field Options table)
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwDODzuJ-c4BNYGm"
+    itemId: "'"$ITEM_ID"'"
+    fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y8FI"
+    value: {singleSelectOptionId: "acaef4ee"}
+  }) { projectV2Item { id } }
+}'
+
+# Set track (use option ID from Field Options table)
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwDODzuJ-c4BNYGm"
+    itemId: "'"$ITEM_ID"'"
+    fieldId: "PVTSSF_lADODzuJ-c4BNYGmzg8Y8FM"
+    value: {singleSelectOptionId: "e916e7bd"}
   }) { projectV2Item { id } }
 }'
 ```
@@ -336,6 +366,19 @@ mutation {
 ```bash
 gh project item-list 1 --owner KeyArc --format json | jq '.items[] | {number: .content.number, title: .content.title, status: .status}'
 ```
+
+### GitHub API Tips
+
+Use `gh api` - handles auth automatically:
+```bash
+gh api repos/OWNER/REPO/issues -q '.[] | {number, title}'  # GET + jq
+gh api repos/OWNER/REPO/issues/10/comments -X POST -f body="text"  # -f for strings
+gh api repos/OWNER/REPO/issues/10/dependencies/blocked_by -X POST -F issue_id=123  # -F for integers
+```
+
+For project boards, use `gh api graphql -f query='mutation {...}'`.
+
+Auto-unblock workflow: `.github/workflows/auto-unblock-issues.yml` moves issues to "Ready" when blockers close.
 
 ### Organizational Hierarchy
 
