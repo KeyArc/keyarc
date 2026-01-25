@@ -10,6 +10,17 @@ description: Use when tackling complex features, architectural decisions, or pro
 
 Claude tends to jump straight into coding. For complex problems requiring deeper thinking, force explicit research and planning phases BEFORE writing any code.
 
+## Before You Start
+
+Follow the standard development workflow from CLAUDE.md before beginning any feature work:
+
+1. **Checkout and pull main:** `git checkout main && git pull`
+2. **Create branch with issue number:** `git checkout -b <type>/<issue-number>-<description>`
+3. **Update project board status** to "In Progress" (see CLAUDE.md "GitHub Project Board Updates" section)
+
+Branch naming convention: `<type>/<issue-number>-<short-description>`
+- Examples: `feat/42-add-folder-support`, `fix/15-login-token-refresh`
+
 ## When to Use
 
 ✅ **Always plan first for:**

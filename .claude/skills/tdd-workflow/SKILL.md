@@ -10,6 +10,17 @@ description: Use when implementing new features or fixing bugs in code. Enforces
 
 Write tests before implementation code. Watch tests fail with the right error message, then write minimal code to pass them.
 
+## Before You Start
+
+Follow the standard development workflow from CLAUDE.md before beginning any implementation:
+
+1. **Checkout and pull main:** `git checkout main && git pull`
+2. **Create branch with issue number:** `git checkout -b <type>/<issue-number>-<description>`
+3. **Update project board status** to "In Progress" (see CLAUDE.md "GitHub Project Board Updates" section)
+
+Branch naming convention: `<type>/<issue-number>-<short-description>`
+- Examples: `feat/42-add-folder-support`, `fix/15-login-token-refresh`
+
 ## Iron Law
 **NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST**
 
